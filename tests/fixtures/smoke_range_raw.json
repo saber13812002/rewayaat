@@ -1,0 +1,130 @@
+{
+ "fetched_at": "2026-11-15T19:08:24Z",
+ "probes": {
+  "A_range_syntax": {
+   "url": "https://rewayaat.info/v1/narrations?q=book%3A%22Al-K%C4%81fi%22+number%3A%5B1+TO+5000%5D&sort_fields=book%2Cnumber&page=1&per_page=2",
+   "query": "book:\"Al-Kāfi\" number:[1 TO 5000]",
+   "elapsed_s": 0.8,
+   "totalResultSetSize": 10000,
+   "baseResultSetSize": 10000,
+   "returned": 2,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2506",
+     "number": "2506",
+     "chapter": "The Dogs"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2504",
+     "number": "2504",
+     "chapter": "The Dogs"
+    }
+   ]
+  },
+  "B_scope_question": {
+   "url": "https://rewayaat.info/v1/narrations?q=book%3A%22Al-K%C4%81fi%22+chapter%3A%22How+does+it+happen%3F%22&sort_fields=book%2Cnumber&page=1&per_page=3",
+   "query": "book:\"Al-Kāfi\" chapter:\"How does it happen?\"",
+   "elapsed_s": 0.6,
+   "totalResultSetSize": 1,
+   "baseResultSetSize": 1,
+   "returned": 1,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-8-Kulayni:490",
+     "number": "490",
+     "chapter": "How does it happen?"
+    }
+   ]
+  },
+  "C_scope_brackets": {
+   "url": "https://rewayaat.info/v1/narrations?q=book%3A%22Ghurar+al-%E1%B8%A4ikam%22+chapter%3A%22Abstinence+%5Bfrom+Food%5D%22&sort_fields=book%2Cnumber&page=1&per_page=3",
+   "query": "book:\"Ghurar al-Ḥikam\" chapter:\"Abstinence [from Food]\"",
+   "elapsed_s": 0.6,
+   "totalResultSetSize": 2,
+   "baseResultSetSize": 2,
+   "returned": 2,
+   "docs": [
+    {
+     "_id": "Ghurar-al-Hikam-Amidi:2609",
+     "number": "2609",
+     "chapter": "Abstinence [from Food]"
+    },
+    {
+     "_id": "Ghurar-al-Hikam-Amidi:2608",
+     "number": "2608",
+     "chapter": "Abstinence [from Food]"
+    }
+   ]
+  },
+  "D_phrase_brackets": {
+   "url": "https://rewayaat.info/v1/narrations?q=book%3A%22Ghurar+al-%E1%B8%A4ikam%22+%22Abstinence+%5Bfrom+Food%5D%22&sort_fields=book%2Cnumber&page=1&per_page=3",
+   "query": "book:\"Ghurar al-Ḥikam\" \"Abstinence [from Food]\"",
+   "elapsed_s": 0.6,
+   "totalResultSetSize": 2,
+   "baseResultSetSize": 2,
+   "returned": 2,
+   "docs": [
+    {
+     "_id": "Ghurar-al-Hikam-Amidi:2609",
+     "number": "2609",
+     "chapter": "<span class=\"highlight\">Abstinence [from Food</span>]"
+    },
+    {
+     "_id": "Ghurar-al-Hikam-Amidi:2608",
+     "number": "2608",
+     "chapter": "<span class=\"highlight\">Abstinence [from Food</span>]"
+    }
+   ]
+  },
+  "E_main_ghurar": {
+   "url": "https://rewayaat.info/v1/narrations?q=book%3A%22Ghurar+al-%E1%B8%A4ikam%22+chapter%3A%22This+World%22&sort_fields=book%2Cnumber&page=1&per_page=3",
+   "query": "book:\"Ghurar al-Ḥikam\" chapter:\"This World\"",
+   "elapsed_s": 0.6,
+   "totalResultSetSize": 391,
+   "baseResultSetSize": 391,
+   "returned": 3,
+   "docs": [
+    {
+     "_id": "Ghurar-al-Hikam-Amidi:3511",
+     "number": "3511",
+     "chapter": "This World"
+    },
+    {
+     "_id": "Ghurar-al-Hikam-Amidi:3510",
+     "number": "3510",
+     "chapter": "This World"
+    },
+    {
+     "_id": "Ghurar-al-Hikam-Amidi:3509",
+     "number": "3509",
+     "chapter": "This World"
+    }
+   ]
+  },
+  "F_main_kafi": {
+   "url": "https://rewayaat.info/v1/narrations?q=book%3A%22Al-K%C4%81fi%22+chapter%3A%22The+Rare+Ahadith%22&sort_fields=book%2Cnumber&page=1&per_page=3",
+   "query": "book:\"Al-Kāfi\" chapter:\"The Rare Ahadith\"",
+   "elapsed_s": 1.8,
+   "totalResultSetSize": 373,
+   "baseResultSetSize": 373,
+   "returned": 3,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2432",
+     "number": "2432",
+     "chapter": "The Rare Ahadith about the Stumpers"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2431",
+     "number": "2431",
+     "chapter": "The Rare Ahadith about the Stumpers"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2430",
+     "number": "2430",
+     "chapter": "The Rare Ahadith about the Stumpers"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,77 @@
+{
+ "fetched_at": "2026-11-15T19:24:50Z",
+ "probes": {
+  "G1_phrase_alone": {
+   "query": "book:\"Al-Kāfi\" \"\"Allah sent down His comfort...\" (9:40)\"",
+   "total": 10000,
+   "base": 10000,
+   "elapsed_s": 0.9,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2509",
+     "number": "2509",
+     "chapter": "Instigating Animals against each other"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2508",
+     "number": "2508",
+     "chapter": "Instigating Animals against each other"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2507",
+     "number": "2507",
+     "chapter": "The Dogs"
+    }
+   ]
+  },
+  "G2_group_alone": {
+   "query": "book:\"Al-Kāfi\" (9:40)",
+   "total": 897,
+   "base": 897,
+   "elapsed_s": 0.8,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2504",
+     "number": "2504",
+     "chapter": "The Dogs"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2489",
+     "number": "2489",
+     "chapter": "The Rooster"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2488",
+     "number": "2488",
+     "chapter": "The Rooster"
+    }
+   ]
+  },
+  "G4_even_star_scope": {
+   "query": "book:\"Al-Kāfi\" chapter:\"*Allah sent down His comfort...* (9:40)\"",
+   "total": 1,
+   "base": 1,
+   "elapsed_s": 0.6,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-8-Kulayni:571",
+     "number": "571",
+     "chapter": "\"Allah sent down His comfort...\" (9:40)"
+    }
+   ]
+  },
+  "H4_odd_star_scope": {
+   "query": "book:\"Al-Kāfi\" chapter:\"'If you try to count the bounties Allah...* (16:18)\"",
+   "total": 1,
+   "base": 1,
+   "elapsed_s": 0.6,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-8-Kulayni:592",
+     "number": "592",
+     "chapter": "'If you try to count the bounties Allah...\" (16:18)"
+    }
+   ]
+  }
+ }
+}

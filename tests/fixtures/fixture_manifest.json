@@ -10,5 +10,29 @@
     "fetched_at": "2026-11-15",
     "count": 3,
     "sha256": "325942807e57d314aea4f7bb3f52d19355bbb7b95ce744e130be5f4341ae2512"
+  },
+  "smoke_range_raw.json": {
+    "source": "live LOOKUP probes (tmp/smoke_range.py), 6 probes",
+    "fetched_at": "2026-11-15T19:08:24Z",
+    "count": 6,
+    "sha256": "e175531432979df804b374078ec828288f6906382426876719b27464cfe67f93"
+  },
+  "chapter_split.json": {
+    "source": "local batches (batches/*.jsonl + batches/v1-restored/*.jsonl), 50,038 docs",
+    "fetched_at": "2026-11-15",
+    "count": 21,
+    "sha256": "cd21ded1118d2c9abab8852868d41f6e47943290d1954df2c794852c7b79449d"
+  },
+  "smoke_quotes_raw.json": {
+    "source": "live LOOKUP probes (tmp/smoke_quotes.py), quote-chapter round 1 — phrase strategy failures",
+    "fetched_at": "2026-11-15",
+    "count": 4,
+    "sha256": "0e5e71bb8fbadd1ec0ee750c398067b6c5fb271f915bca381837aa40009f1433"
+  },
+  "smoke_quotes2_raw.json": {
+    "source": "live LOOKUP probes (tmp/smoke_quotes2.py), quote-chapter round 2 — star-wildcard scope exact totals",
+    "fetched_at": "2026-11-15",
+    "count": 4,
+    "sha256": "c39fd479882c9d481ba54e0144e863c98f872a68976951c63c9c561e507a0d2a"
   }
 }

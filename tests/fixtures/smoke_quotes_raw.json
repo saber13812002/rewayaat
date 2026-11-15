@@ -1,0 +1,61 @@
+{
+ "fetched_at": "2026-11-15T19:23:04Z",
+ "probes": {
+  "E_phrase": {
+   "chapter": "\"Allah sent down His comfort...\" (9:40)",
+   "stripped": "Allah sent down His comfort... (9:40)",
+   "local_count": 1,
+   "query": "book:\"Al-Kāfi\" \"\"Allah sent down His comfort...\" (9:40)\"",
+   "total": 10000,
+   "base": 10000,
+   "elapsed_s": 0.9,
+   "docs": [
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2509",
+     "number": "2509",
+     "chapter": "Instigating Animals against each other"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2508",
+     "number": "2508",
+     "chapter": "Instigating Animals against each other"
+    },
+    {
+     "_id": "Al-Kafi-Volume-6-Kulayni:2507",
+     "number": "2507",
+     "chapter": "The Dogs"
+    }
+   ]
+  },
+  "E_stripped_scope": {
+   "chapter": "\"Allah sent down His comfort...\" (9:40)",
+   "stripped": "Allah sent down His comfort... (9:40)",
+   "local_count": 1,
+   "query": "book:\"Al-Kāfi\" chapter:\"Allah sent down His comfort... (9:40)\"",
+   "total": 0,
+   "base": 0,
+   "elapsed_s": 0.6,
+   "docs": []
+  },
+  "O_phrase": {
+   "chapter": "'If you try to count the bounties Allah...\" (16:18)",
+   "stripped": "'If you try to count the bounties Allah... (16:18)",
+   "local_count": 1,
+   "query": "book:\"Al-Kāfi\" \"'If you try to count the bounties Allah...\" (16:18)\"",
+   "total": 0,
+   "base": 0,
+   "elapsed_s": 0.6,
+   "docs": []
+  },
+  "O_stripped_scope": {
+   "chapter": "'If you try to count the bounties Allah...\" (16:18)",
+   "stripped": "'If you try to count the bounties Allah... (16:18)",
+   "local_count": 1,
+   "query": "book:\"Al-Kāfi\" chapter:\"'If you try to count the bounties Allah... (16:18)\"",
+   "total": 0,
+   "base": 0,
+   "elapsed_s": 0.6,
+   "docs": []
+  }
+ }
+}
