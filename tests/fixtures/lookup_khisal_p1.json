@@ -1,0 +1,1076 @@
+{
+ "collection": [
+  {
+   "_id": "Al-Khisal-Saduq:1282",
+   "book": "Al-Khiṣāl",
+   "number": "1282",
+   "part": "Part 28: On More than One-Thousand Numbered Characteristics",
+   "chapter": "God Has Created One Million Worlds and One Million Breed of Humans",
+   "section": "9",
+   "volume": "1",
+   "tags": [],
+   "topic_tags": [
+    "creation",
+    "paradise"
+   ],
+   "arabic": "28-44 حدثنا أبي رضي الله عنه قال: حدثنا سعد بن عبد الله قال: حدثنا محمد ابن عيسى، عن الحسن بن محبوب، عن عمرو بن شمر، عن جابر بن يزيد قال: سألت أبا جعفر عليه السلام عن قول الله عز وجل: \"أَفَعَيِينَا بِالْخَلْقِ الأَوَّلِ بَلْ هُمْ فِي لَبْسٍ مِنْ خَلْقٍ جَدِيدٍ.\" فقال: يا جابر تأويل ذلك أن الله عز وجل إذا أفنى هذا الخلق وهذا العالم وأسكن أهل الجنة الجنة وأهل النار النار جدد الله عز وجل عالما غير هذا العالم وجدد عالما من غير فحولة ولا إناث يعبدونه ويوحدونه، وخلق لهم أرضا غير هذه الارض تحملهم وسماء غير هذه السماء تظلهم، لعلك ترى أن الله عز وجل إنما خلق هذا العالم الواحد، وترى أن الله عز وجل لم يخلق بشرا غيركم، بل والله لقد خلق الله تبارك وتعالى ألف ألف عالم وألف ألف آدم أنت في آخر تلك العوالم وأولئك الآدميين",
+   "english": "28-44 (The compiler of the book narrated) that his father - may God be pleased with him - narrated that Sa’ed ibn Abdullah quoted on the authority of Muhammad ibn Isa, on the authority of Al-Hassan ibn Mahboob, on the authority of Amr ibn Shimr, on the authority of Jabir ibn Yazid that Aba Ja’far al-Baqir (MGB) was asked about the following words of God the Honorable the Exalted, ‘Were We then weary with the first Creation, that they should be in confused doubt about a new Creation?’ The Imam (as) replied, “O Jabir! Its interpretation is that when the Honorable the Exalted God destroys this creation; this world and houses; the people of Heaven in Heaven; and the people of Hell in Hell, then the Honorable the Exalted God will create another world with a new set of monotheist people without any male or female distinction to worship Him. God will create another Earth for them to live in and will create another sky to cast a shadow upon their heads. Maybe you believe that the Honorable the Exalted God has not created any other world and has not created any other humans than you? Indeed, I swear by God that the Blessed the Sublimed God has created a million worlds and a million breeds of humans, and you are in the very end of these worlds and of the last breed of human beings.",
+   "source": "Shaykh Muḥammad b. ʿAlī al-Ṣaduq",
+   "gradings": [],
+   "related": [
+    {
+     "url": "https://thaqalayn.net/hadith/10/29/9/1",
+     "title": "Thaqalayn Source"
+    }
+   ],
+   "history": [],
+   "englishContent": "“O Jabir! Its interpretation is that when the Honorable the Exalted God destroys this creation; this world and houses; the people of Heaven in Heaven; and the people of Hell in Hell, then the Honorable the Exalted God will create another world with a new set of monotheist people without any male or female distinction to worship Him. God will create another Earth for them to live in and will create another sky to cast a shadow upon their heads. Maybe you believe that the Honorable the Exalted God has not created any other world and has not created any other humans than you? Indeed, I swear by God that the Blessed the Sublimed God has created a million worlds and a million breeds of humans, and you are in the very end of these worlds and of the last breed of human beings.",
+   "part_ar": "القسم الثامن والعشرون: في الخصال التي تزيد على الألف",
+   "chain_links_en": [
+    {
+     "p": "n000710",
+     "s": 47,
+     "t": "his father",
+     "e": 57,
+     "g": "ali-ibn-al-husayn-ibn-musa-ibn-babawayh"
+    },
+    {
+     "p": "n000492",
+     "s": 104,
+     "t": "Sa’ed ibn Abdullah",
+     "e": 122,
+     "g": "sad-ibn-abdullah-ibn-abi-khalaf"
+    },
+    {
+     "p": "n000922",
+     "s": 150,
+     "t": "Muhammad ibn Isa",
+     "e": 166,
+     "g": "muhammad-ibn-isa-ibn-ubayd-ibn-yaqtin"
+    },
+    {
+     "p": "n001405",
+     "s": 188,
+     "t": "Al-Hassan ibn Mahboob",
+     "e": 209,
+     "g": "al-hasan-ibn-mahbub-al-sarrad"
+    },
+    {
+     "p": "n000792",
+     "s": 231,
+     "t": "Amr ibn Shimr",
+     "e": 244,
+     "g": "amr-ibn-shimr"
+    },
+    {
+     "p": "n000353",
+     "s": 266,
+     "t": "Jabir ibn Yazid",
+     "e": 281,
+     "g": "jabir-ibn-yazid"
+    }
+   ],
+   "chain_links": [
+    {
+     "p": "n000710",
+     "s": 12,
+     "t": "أبي",
+     "e": 15,
+     "g": "ali-ibn-al-husayn-ibn-musa-ibn-babawayh"
+    },
+    {
+     "p": "n000492",
+     "s": 40,
+     "t": "سعد بن عبد الله",
+     "e": 55,
+     "g": "sad-ibn-abdullah-ibn-abi-khalaf"
+    },
+    {
+     "p": "n000922",
+     "s": 67,
+     "t": "محمد ابن عيسى",
+     "e": 80,
+     "g": "muhammad-ibn-isa-ibn-ubayd-ibn-yaqtin"
+    },
+    {
+     "p": "n001405",
+     "s": 85,
+     "t": "الحسن بن محبوب",
+     "e": 99,
+     "g": "al-hasan-ibn-mahbub-al-sarrad"
+    },
+    {
+     "p": "n000792",
+     "s": 104,
+     "t": "عمرو بن شمر",
+     "e": 115,
+     "g": "amr-ibn-shimr"
+    },
+    {
+     "p": "n000353",
+     "s": 120,
+     "t": "جابر بن يزيد",
+     "e": 132,
+     "g": "jabir-ibn-yazid"
+    }
+   ],
+   "arabicChain": "28-44 حدثنا <a class=\"chain-name\" href=\"/narrator/n000710/ali-ibn-al-husayn-ibn-musa-ibn-babawayh\">أبي</a> رضي الله عنه قال: حدثنا <a class=\"chain-name\" href=\"/narrator/n000492/sad-ibn-abdullah-ibn-abi-khalaf\">سعد بن عبد الله</a> قال: حدثنا <a class=\"chain-name\" href=\"/narrator/n000922/muhammad-ibn-isa-ibn-ubayd-ibn-yaqtin\">محمد ابن عيسى</a>، عن <a class=\"chain-name\" href=\"/narrator/n001405/al-hasan-ibn-mahbub-al-sarrad\">الحسن بن محبوب</a>، عن <a class=\"chain-name\" href=\"/narrator/n000792/amr-ibn-shimr\">عمرو بن شمر</a>، عن <a class=\"chain-name\" href=\"/narrator/n000353/jabir-ibn-yazid\">جابر بن يزيد</a> قال",
+   "section_ar": "القسم 9",
+   "llm_similar": [
+    {
+     "reason": "Both are the same hadith about what happens after Paradise/Hell are populated. Source asks the question and gets a brief answer. Candidate is the full narration from Abu Ja'far about Allah creating a new world referencing Quran 50:15. Same hadith with same core content about creating new creation after eschaton.",
+     "match_type": "conceptual",
+     "id": "Kitab-al-Zuhd-Ahwazi:284"
+    }
+   ],
+   "source_ar": "الشيخ محمد بن علي الصدوق",
+   "semantic_matn_source": "سألت أبا جعفر عن قول الله عز وجل: \"أَفَعَيِينَا بِالْخَلْقِ الأَوَّلِ بَلْ هُمْ فِي لَبْسٍ مِنْ خَلْقٍ جَدِيدٍ.\" فقال: يا جابر تأويل ذلك أن الله عز وجل إذا أفنى هذا الخلق وهذا العالم وأسكن أهل الجنة الجنة وأهل النار النار جدد الله عز وجل عالما غير هذا العالم وجدد عالما من غير فحولة ولا إناث يعبدونه ويوحدونه، وخلق لهم أرضا غير هذه الارض تحملهم وسماء غير هذه السماء تظلهم، لعلك ترى أن الله عز وجل إنما خلق هذا العالم الواحد، وترى أن الله عز وجل لم يخلق بشرا غيركم، بل والله لقد خلق الله تبارك وتعالى ألف ألف عالم وألف ألف آدم أنت في آخر تلك العوالم وأولئك الآدميين",
+   "chapter_ar": "خلق الله مليون عالم ومليون نوع من البشر",
+   "englishChain": "28-44 (The compiler of the book narrated) that <a class=\"chain-name\" href=\"/narrator/n000710/ali-ibn-al-husayn-ibn-musa-ibn-babawayh\">his father</a> - may God be pleased with him - narrated that <a class=\"chain-name\" href=\"/narrator/n000492/sad-ibn-abdullah-ibn-abi-khalaf\">Sa’ed ibn Abdullah</a> quoted on the authority of <a class=\"chain-name\" href=\"/narrator/n000922/muhammad-ibn-isa-ibn-ubayd-ibn-yaqtin\">Muhammad ibn Isa</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/n001405/al-hasan-ibn-mahbub-al-sarrad\">Al-Hassan ibn Mahboob</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/n000792/amr-ibn-shimr\">Amr ibn Shimr</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/n000353/jabir-ibn-yazid\">Jabir ibn Yazid</a> that Aba Ja’far al-Baqir (MGB) was asked about the following words of God the Honorable the Exalted, ‘Were We then weary with the first Creation, that they should be in confused doubt about a new Creation?’ The Imam (as) replied",
+   "arabicContent": "سألت أبا جعفر عليه السلام عن قول الله عز وجل: \"أَفَعَيِينَا بِالْخَلْقِ الأَوَّلِ بَلْ هُمْ فِي لَبْسٍ مِنْ خَلْقٍ جَدِيدٍ.\" فقال: يا جابر تأويل ذلك أن الله عز وجل إذا أفنى هذا الخلق وهذا العالم وأسكن أهل الجنة الجنة وأهل النار النار جدد الله عز وجل عالما غير هذا العالم وجدد عالما من غير فحولة ولا إناث يعبدونه ويوحدونه، وخلق لهم أرضا غير هذه الارض تحملهم وسماء غير هذه السماء تظلهم، لعلك ترى أن الله عز وجل إنما خلق هذا العالم الواحد، وترى أن الله عز وجل لم يخلق بشرا غيركم، بل والله لقد خلق الله تبارك وتعالى ألف ألف عالم وألف ألف آدم أنت في آخر تلك العوالم وأولئك الآدميين",
+   "chain_people": [
+    {
+     "p": "n000710",
+     "s": 12,
+     "t": "أبي",
+     "e": 15,
+     "g": "ali-ibn-al-husayn-ibn-musa-ibn-babawayh",
+     "k": "relative",
+     "o": "convention"
+    },
+    {
+     "p": "n000492",
+     "s": 40,
+     "t": "سعد بن عبد الله",
+     "e": 55,
+     "g": "sad-ibn-abdullah-ibn-abi-khalaf",
+     "k": "name",
+     "o": "convention"
+    },
+    {
+     "p": "n000922",
+     "s": 67,
+     "t": "محمد ابن عيسى",
+     "e": 80,
+     "g": "muhammad-ibn-isa-ibn-ubayd-ibn-yaqtin",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n001405",
+     "s": 85,
+     "t": "الحسن بن محبوب",
+     "e": 99,
+     "g": "al-hasan-ibn-mahbub-al-sarrad",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n000792",
+     "s": 104,
+     "t": "عمرو بن شمر",
+     "e": 115,
+     "g": "amr-ibn-shimr",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n000353",
+     "s": 120,
+     "t": "جابر بن يزيد",
+     "e": 132,
+     "g": "jabir-ibn-yazid",
+     "k": "name",
+     "o": "chosen"
+    }
+   ],
+   "semantic_significant_terms_source": "خلق جابر جديد نار لبس جنه",
+   "book_ar": "الخصال",
+   "semantic_english_hint_source": "Honorable the Exalted God has not created any other world and has not created any other humans than you? Indeed, I swear"
+  },
+  {
+   "_id": "Al-Khisal-Saduq:1281",
+   "book": "Al-Khiṣāl",
+   "number": "1281",
+   "part": "Part 28: On More than One-Thousand Numbered Characteristics",
+   "chapter": "God Addressed Moses with One-Hundred Twenty-Four Thousand Words",
+   "section": "8",
+   "volume": "1",
+   "tags": [],
+   "topic_tags": [
+    "imam-ali",
+    "ahl-al-bayt",
+    "prophet-muhammad"
+   ],
+   "arabic": "28-43 حدثنا علي بن أحمد بن موسى، ومحمد بن أحمد السناني المكتب، والحسين ابن إبراهيم بن أحمد بن هشام المؤدب، وعلي بن عبد الله الوراق رضي الله عنهم قالوا: حدثنا أحمد بن يحيى بن زكريا القطان، عن بكر بن عبد الله بن حبيب قال: حدثنا تميم بن بهلول قال: حدثنا أبومعاوية، عن سليمان بن مهران، عن جعفر بن محمد، عن أبيه محمد بن علي، عن أبيه علي بن الحسين، عن أبيه الحسين بن علي، عن أبيه علي بن أبي طالب عليهم السلام قال: لما حضرت رسول الله صلى الله عليه وآله الوفاة دعاني فلما دخلت عليه قال لي: يا علي أنت وصيي وخليفتي على أهلي وامتي، في حياتي وبعد موتي، وليك وليي ووليي ولي الله، وعدوك عدوي، وعدوي عدو الله، يا علي المنكر لولايتك بعدي كالمنكر لرسالتي في حياتي لانك مني وأنا منك، ثم أدناني فأسر إلي ألف باب من العلم، كل باب يفتح ألف باب",
+   "english": "28-43 Ali ibn Ahmad ibn Musa, Muhammad ibn Ahmad al-Senani al-Mokattib, al-Hussein ibn Ibrahim ibn Hisham al-Mo’ad’dab and Ali ibn Abdullah al-Var’raq - may God be pleased with them - narrated that Ahmad ibn Yahya ibn Zakaria al-Qat’tan quoted Bakr ibn Abdullah ibn Habib, on the authority of Tamim ibn Buhlool, on the authority of Abu Muawiyah, on the authority of Suleiman ibn Mihran, on the authority of Ja’far ibn Muhammad as-Sadiq (MGB), on the authority of his father Muhammad ibn Ali al-Baqir (MGB), on the authority of his father Ali ibn al-Hussein as-Sajjad (MGB), on the authority of his father Al-Hussein ibn Ali (MGB), on the authority of his father Ali ibn Abi Talib (MGB), “When it was time for the death of God’s Prophet (MGB), the Prophet (MGB) called me in. When I went to see him, the Prophet (MGB) told me, ‘O Ali! You are my Trustee and my successor over my Household and my Nation both during my life and after my death. Your friends will be my friends and my friends are God’s friends. Your enemies will be my enemies and my enemies are God’s enemies. O Ali! Whoever denies your mastery after me, it is as if he has denied my Messengership during my life. You are from me and I am from you.’ Then the Prophet (MGB) asked me to get close to him and taught me one-thousand gates of knowledge each of which opens up to one-thousand gates.”",
+   "source": "Shaykh Muḥammad b. ʿAlī al-Ṣaduq",
+   "gradings": [],
+   "related": [
+    {
+     "url": "https://thaqalayn.net/hadith/10/29/8/34",
+     "title": "Thaqalayn Source"
+    }
+   ],
+   "history": [],
+   "englishContent": "“When it was time for the death of God’s Prophet (MGB), the Prophet (MGB) called me in. When I went to see him, the Prophet (MGB) told me, ‘O Ali! You are my Trustee and my successor over my Household and my Nation both during my life and after my death. Your friends will be my friends and my friends are God’s friends. Your enemies will be my enemies and my enemies are God’s enemies. O Ali! Whoever denies your mastery after me, it is as if he has denied my Messengership during my life. You are from me and I am from you.’ Then the Prophet (MGB) asked me to get close to him and taught me one-thousand gates of knowledge each of which opens up to one-thousand gates.”",
+   "part_ar": "القسم الثامن والعشرون: في الخصال التي تزيد على الألف",
+   "chain_links_en": [
+    {
+     "p": "n002764",
+     "s": 6,
+     "t": "Ali ibn Ahmad ibn Musa",
+     "e": 28,
+     "g": "ali-ibn-ahmad-ibn-musa"
+    },
+    {
+     "p": "n002135",
+     "s": 30,
+     "t": "Muhammad ibn Ahmad al-Senani al-Mokattib",
+     "e": 70,
+     "g": "muhammad-ibn-ahmad-ibn-muhammad-ibn-sinan"
+    },
+    {
+     "p": "n000299",
+     "s": 244,
+     "t": "Bakr ibn Abdullah ibn Habib",
+     "e": 271,
+     "g": "bakr-ibn-abd-allah-ibn-habib-al-muzani"
+    },
+    {
+     "p": "n008362",
+     "s": 366,
+     "t": "Suleiman ibn Mihran",
+     "e": 385,
+     "g": "sulayman-ibn-mihran"
+    },
+    {
+     "p": "i06",
+     "s": 407,
+     "t": "Ja’far ibn Muhammad",
+     "e": 426,
+     "g": "jafar-al-sadiq"
+    },
+    {
+     "p": "i05",
+     "s": 474,
+     "t": "Muhammad ibn Ali",
+     "e": 490,
+     "g": "muhammad-al-baqir"
+    },
+    {
+     "p": "i04",
+     "s": 538,
+     "t": "Ali ibn al-Hussein",
+     "e": 556,
+     "g": "ali-ibn-al-husayn-al-sajjad"
+    },
+    {
+     "p": "i03",
+     "s": 605,
+     "t": "Al-Hussein ibn Ali",
+     "e": 623,
+     "g": "al-husayn-ibn-ali"
+    },
+    {
+     "p": "i01",
+     "s": 662,
+     "t": "Ali ibn Abi Talib",
+     "e": 679,
+     "g": "ali-ibn-abi-talib"
+    }
+   ],
+   "chain_links": [
+    {
+     "p": "n002764",
+     "s": 12,
+     "t": "علي بن أحمد بن موسى",
+     "e": 31,
+     "g": "ali-ibn-ahmad-ibn-musa"
+    },
+    {
+     "p": "n002135",
+     "s": 34,
+     "t": "محمد بن أحمد السناني المكتب",
+     "e": 61,
+     "g": "muhammad-ibn-ahmad-ibn-muhammad-ibn-sinan"
+    },
+    {
+     "p": "n010762",
+     "s": 64,
+     "t": "الحسين ابن إبراهيم بن أحمد بن هشام المؤدب",
+     "e": 105,
+     "g": "al-husayn-ibn-ibrahim-ibn-ahmad-ibn-hisham"
+    },
+    {
+     "p": "n000299",
+     "s": 191,
+     "t": "بكر بن عبد الله بن حبيب",
+     "e": 214,
+     "g": "bakr-ibn-abd-allah-ibn-habib-al-muzani"
+    },
+    {
+     "p": "n008362",
+     "s": 265,
+     "t": "سليمان بن مهران",
+     "e": 280,
+     "g": "sulayman-ibn-mihran"
+    },
+    {
+     "p": "i06",
+     "s": 285,
+     "t": "جعفر بن محمد",
+     "e": 297,
+     "g": "jafar-al-sadiq"
+    },
+    {
+     "p": "i05",
+     "s": 302,
+     "t": "أبيه محمد بن علي",
+     "e": 318,
+     "g": "muhammad-al-baqir"
+    },
+    {
+     "p": "i04",
+     "s": 323,
+     "t": "أبيه علي بن الحسين",
+     "e": 341,
+     "g": "ali-ibn-al-husayn-al-sajjad"
+    },
+    {
+     "p": "i03",
+     "s": 346,
+     "t": "أبيه الحسين بن علي",
+     "e": 364,
+     "g": "al-husayn-ibn-ali"
+    },
+    {
+     "p": "i01",
+     "s": 369,
+     "t": "أبيه علي بن أبي طالب",
+     "e": 389,
+     "g": "ali-ibn-abi-talib"
+    }
+   ],
+   "arabicChain": "28-43 حدثنا <a class=\"chain-name\" href=\"/narrator/n002764/ali-ibn-ahmad-ibn-musa\">علي بن أحمد بن موسى</a>، و<a class=\"chain-name\" href=\"/narrator/n002135/muhammad-ibn-ahmad-ibn-muhammad-ibn-sinan\">محمد بن أحمد السناني المكتب</a>، و<a class=\"chain-name\" href=\"/narrator/n010762/al-husayn-ibn-ibrahim-ibn-ahmad-ibn-hisham\">الحسين ابن إبراهيم بن أحمد بن هشام المؤدب</a>، وعلي بن عبد الله الوراق رضي الله عنهم قالوا: حدثنا أحمد بن يحيى بن زكريا القطان، عن <a class=\"chain-name\" href=\"/narrator/n000299/bakr-ibn-abd-allah-ibn-habib-al-muzani\">بكر بن عبد الله بن حبيب</a> قال: حدثنا تميم بن بهلول قال: حدثنا أبومعاوية، عن <a class=\"chain-name\" href=\"/narrator/n008362/sulayman-ibn-mihran\">سليمان بن مهران</a>، عن <a class=\"chain-name\" href=\"/narrator/i06/jafar-al-sadiq\">جعفر بن محمد</a>، عن <a class=\"chain-name\" href=\"/narrator/i05/muhammad-al-baqir\">أبيه محمد بن علي</a>، عن <a class=\"chain-name\" href=\"/narrator/i04/ali-ibn-al-husayn-al-sajjad\">أبيه علي بن الحسين</a>، عن <a class=\"chain-name\" href=\"/narrator/i03/al-husayn-ibn-ali\">أبيه الحسين بن علي</a>، عن <a class=\"chain-name\" href=\"/narrator/i01/ali-ibn-abi-talib\">أبيه علي بن أبي طالب</a> عليهم السلام قال",
+   "section_ar": "القسم 8",
+   "llm_similar": [
+    {
+     "reason": "Near-duplicate of the same Prophetic declaration. Contains core shared phrases: 'you are my wasi and khalifa', 'your friend is my friend and God's friend', 'your enemy is my enemy and God's enemy', 'you are from me and I from you'. The source hadith's complete core text appears within this candidate.",
+     "match_type": "wording",
+     "id": "Al-Amali-Mufid:255"
+    },
+    {
+     "reason": "Prophet's deathbed: Ali is my wasi, khalifa, friend/foe alignment, taught 1000 doors of knowledge. Overlaps with source hadith's merits (wasi, knowledge, bed, Ghadir themes).",
+     "match_type": "wording",
+     "id": "Al-Khisal-Saduq:1190"
+    },
+    {
+     "reason": "About Prophet's deathbed instruction to Ali: 'أنت وصيي وخليفتي', 'وليك وليي ووليي ولي الله', 'عدوك عدوي'. Shares the core phrases from the same tradition.",
+     "match_type": "wording",
+     "id": "Al-Amali-Mufid:199"
+    },
+    {
+     "reason": "Shares key phrases: 'يا علي أنت وصيي وخليفتي على أهلي وأمتي، في حياتي وبعد موتي' and 'منك وأنا منك'. Same core declaration of Ali's succession and authority from the Prophet, though set at the Prophet's deathbed rather than at Quba.",
+     "match_type": "wording",
+     "id": "Al-Amali-Saduq:79"
+    },
+    {
+     "reason": "Prophet on his deathbed telling Ali: 'anta wasiyy wa khalifati ala ahli wa ummati', same love/hate formula, 'anta minni wa ana minka'. Same farewell hadith with additional detail about 1000 doors of knowledge.",
+     "match_type": "wording",
+     "id": "Al-Amali-Saduq:603"
+    },
+    {
+     "reason": "Same core narrative: Ali reports that when the Prophet was dying, he called Ali, declared him his wasi and khalifa, said 'you are from me and I am from you,' and then whispered to him a thousand doors of knowledge each opening a thousand doors. Same event — the Prophet's deathbed appointment of Ali and transmission of sacred knowledge. The candidate adds the explicit declaration of wilayah but the core event is the same.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:1256"
+    },
+    {
+     "reason": "Same tradition: Prophet tells Ali 'anta wasiyy wa khalifati fi ahli wa ummati fi hayati wa ba'da mawti.' Adds wali/adaw formula and the detail of 1000 doors of knowledge. Same vicegerency declaration at deathbed context.",
+     "match_type": "conceptual",
+     "id": "Al-Amali-Saduq:1046"
+    },
+    {
+     "reason": "Both share the 'thousand doors each opening a thousand doors' motif. Source mentions it in passing; candidate describes the Prophet whispering a thousand doors of knowledge to Ali at his deathbed. Same core tradition with different context.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:1252"
+    },
+    {
+     "reason": "Different context (deathbed of Prophet) but contains the same core declarations: 'anta wasiyy wa khalifati... waliyyuka waliyyi wa waliyyi waliyyu Allah, wa aduwuka aduwwi wa aduwwi aduwu Allah'. Same essential content in a different narrative frame.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:979"
+    },
+    {
+     "reason": "Prophet at death appoints Ali as successor and teaches 1000 gates of knowledge. Same core tradition with additional succession detail.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:1265"
+    },
+    {
+     "reason": "The candidate narrates the Prophet's deathbed address to Ali, appointing him as wasi and khalifa, and then whispering 'a thousand gates of knowledge, each gate opens a thousand gates.' The source is about Ali's knowledge and the same thousand-gates concept. The candidate provides the specific context (Prophet's deathbed) for the same teaching.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:1257"
+    },
+    {
+     "reason": "Both narrate the Prophet's declaration of Ali's authority at his deathbed. Source lists Ali's virtues (mawla, Harun, from me, war/peace, friend/enemy, hujjah). Candidate is the Prophet telling Ali at his death: you are my successor, your friend is Allah's friend, your enemy is Allah's enemy, you are from me and I from you, plus giving him knowledge. Same core phrases and theme.",
+     "match_type": "conceptual",
+     "id": "Al-Amali-Saduq:166"
+    },
+    {
+     "reason": "Source: 'whoever denies Ali's imamate is like one who denies my prophethood.' Candidate: 'the denier of your wilaya after me is like the denier of my risala during my lifetime, because you are from me and I am from you.' Same core equivalence with nearly identical Arabic phrasing (المنكر لولايتك بعدي كالمنكر لرسالتي في حياتي).",
+     "match_type": "conceptual",
+     "id": "Al-Amali-Saduq:1045"
+    },
+    {
+     "reason": "Same core teaching: Ali as the Prophet's successor and wali over the believers, expressed at the deathbed.",
+     "match_type": "conceptual",
+     "id": "Al-Amali-Saduq:23"
+    }
+   ],
+   "source_ar": "الشيخ محمد بن علي الصدوق",
+   "semantic_matn_source": "لما حضرت رسول الله الوفاة دعاني فلما دخلت عليه قال لي: يا علي أنت وصيي وخليفتي على أهلي وامتي، في حياتي وبعد موتي، وليك وليي ووليي ولي الله، وعدوك عدوي، وعدوي عدو الله، يا علي المنكر لولايتك بعدي كالمنكر لرسالتي في حياتي لانك مني وأنا منك، ثم أدناني فأسر إلي ألف باب من العلم، كل باب يفتح ألف باب",
+   "chapter_ar": "كلم الله موسى بمائة وأربعة وعشرين ألف كلمة",
+   "englishChain": "28-43 <a class=\"chain-name\" href=\"/narrator/n002764/ali-ibn-ahmad-ibn-musa\">Ali ibn Ahmad ibn Musa</a>, <a class=\"chain-name\" href=\"/narrator/n002135/muhammad-ibn-ahmad-ibn-muhammad-ibn-sinan\">Muhammad ibn Ahmad al-Senani al-Mokattib</a>, al-Hussein ibn Ibrahim ibn Hisham al-Mo’ad’dab and Ali ibn Abdullah al-Var’raq - may God be pleased with them - narrated that Ahmad ibn Yahya ibn Zakaria al-Qat’tan quoted <a class=\"chain-name\" href=\"/narrator/n000299/bakr-ibn-abd-allah-ibn-habib-al-muzani\">Bakr ibn Abdullah ibn Habib</a>, on the authority of Tamim ibn Buhlool, on the authority of Abu Muawiyah, on the authority of <a class=\"chain-name\" href=\"/narrator/n008362/sulayman-ibn-mihran\">Suleiman ibn Mihran</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/i06/jafar-al-sadiq\">Ja’far ibn Muhammad</a> as-Sadiq (MGB), on the authority of his father <a class=\"chain-name\" href=\"/narrator/i05/muhammad-al-baqir\">Muhammad ibn Ali</a> al-Baqir (MGB), on the authority of his father <a class=\"chain-name\" href=\"/narrator/i04/ali-ibn-al-husayn-al-sajjad\">Ali ibn al-Hussein</a> as-Sajjad (MGB), on the authority of his father <a class=\"chain-name\" href=\"/narrator/i03/al-husayn-ibn-ali\">Al-Hussein ibn Ali</a> (MGB), on the authority of his father <a class=\"chain-name\" href=\"/narrator/i01/ali-ibn-abi-talib\">Ali ibn Abi Talib</a> (MGB)",
+   "arabicContent": "لما حضرت رسول الله صلى الله عليه وآله الوفاة دعاني فلما دخلت عليه قال لي: يا علي أنت وصيي وخليفتي على أهلي وامتي، في حياتي وبعد موتي، وليك وليي ووليي ولي الله، وعدوك عدوي، وعدوي عدو الله، يا علي المنكر لولايتك بعدي كالمنكر لرسالتي في حياتي لانك مني وأنا منك، ثم أدناني فأسر إلي ألف باب من العلم، كل باب يفتح ألف باب",
+   "chain_people": [
+    {
+     "p": "n002764",
+     "s": 12,
+     "t": "علي بن أحمد بن موسى",
+     "e": 31,
+     "g": "ali-ibn-ahmad-ibn-musa",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n002135",
+     "s": 34,
+     "t": "محمد بن أحمد السناني المكتب",
+     "e": 61,
+     "g": "muhammad-ibn-ahmad-ibn-muhammad-ibn-sinan",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n010762",
+     "s": 64,
+     "t": "الحسين ابن إبراهيم بن أحمد بن هشام المؤدب",
+     "e": 105,
+     "g": "al-husayn-ibn-ibrahim-ibn-ahmad-ibn-hisham",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "",
+     "s": 108,
+     "t": "علي بن عبد الله الوراق",
+     "e": 130,
+     "g": "",
+     "k": "name",
+     "o": "none"
+    },
+    {
+     "p": "",
+     "s": 158,
+     "t": "أحمد بن يحيى بن زكريا القطان",
+     "e": 186,
+     "g": "",
+     "k": "name",
+     "o": "none"
+    },
+    {
+     "p": "n000299",
+     "s": 191,
+     "t": "بكر بن عبد الله بن حبيب",
+     "e": 214,
+     "g": "bakr-ibn-abd-allah-ibn-habib-al-muzani",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "",
+     "s": 226,
+     "t": "تميم بن بهلول",
+     "e": 239,
+     "g": "",
+     "k": "name",
+     "o": "none"
+    },
+    {
+     "p": "",
+     "s": 251,
+     "t": "أبومعاوية",
+     "e": 260,
+     "g": "",
+     "k": "name",
+     "o": "none"
+    },
+    {
+     "p": "n008362",
+     "s": 265,
+     "t": "سليمان بن مهران",
+     "e": 280,
+     "g": "sulayman-ibn-mihran",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "i06",
+     "s": 285,
+     "t": "جعفر بن محمد",
+     "e": 297,
+     "g": "jafar-al-sadiq",
+     "k": "imam",
+     "o": "chosen"
+    },
+    {
+     "p": "i05",
+     "s": 302,
+     "t": "أبيه محمد بن علي",
+     "e": 318,
+     "g": "muhammad-al-baqir",
+     "k": "imam",
+     "o": "chosen"
+    },
+    {
+     "p": "i04",
+     "s": 323,
+     "t": "أبيه علي بن الحسين",
+     "e": 341,
+     "g": "ali-ibn-al-husayn-al-sajjad",
+     "k": "imam",
+     "o": "chosen"
+    },
+    {
+     "p": "i03",
+     "s": 346,
+     "t": "أبيه الحسين بن علي",
+     "e": 364,
+     "g": "al-husayn-ibn-ali",
+     "k": "imam",
+     "o": "chosen"
+    },
+    {
+     "p": "i01",
+     "s": 369,
+     "t": "أبيه علي بن أبي طالب",
+     "e": 389,
+     "g": "ali-ibn-abi-talib",
+     "k": "imam",
+     "o": "chosen"
+    }
+   ],
+   "semantic_significant_terms_source": "وليي عدوي منكر خليفتي حضرت وفاه",
+   "book_ar": "الخصال",
+   "semantic_english_hint_source": "When it was time for the death of God’s Prophet (MGB), the Prophet (MGB) called me in. When I went to see him, the Proph"
+  },
+  {
+   "_id": "Al-Khisal-Saduq:1280",
+   "book": "Al-Khiṣāl",
+   "number": "1280",
+   "part": "Part 28: On More than One-Thousand Numbered Characteristics",
+   "chapter": "God Addressed Moses with One-Hundred Twenty-Four Thousand Words",
+   "section": "8",
+   "volume": "1",
+   "tags": [],
+   "topic_tags": [
+    "imam-ali",
+    "ahl-al-bayt",
+    "prophet-muhammad"
+   ],
+   "arabic": "28-42 حدثنا أبي، ومحمد بن الحسن بن أحمد بن الوليد، وأحمد بن محمد بن يحيى العطار رضي الله عنهم قالوا: حدثنا سعد بن عبد الله، عن محمد بن الحسين بن أبي الخطاب، عن جعفر بن بشير البجلي، والحسن بن علي بن فضال، عن المثنى بن الوليد الحناط، عن منصور بن حازم، عن بكر بن حبيب، عن أبي جعفر عليه السلام قال: قال رسول الله صلى الله عليه وآله في مرضه الذي قبض فيه: ادعوا لي خليلي فأرسلت عائشة وحفصة إلى أبويهما فلما جاء اغطى رسول الله صلى الله عليه وآله وجهه ورأسه، فانصرفا فكشف رأسه رسول الله صلى الله عليه وآله ثم قال: ادعوا لي خليلي فأرسلت حفصة إلى أبيها وعائشة إلى أبيها فلما جاء اغطى رسول الله صلى الله عليه وآله وجهه، فانطلقا وقالا: ما نرى رسول الله صلى الله عليه وآله أرادنا، قالتا: أجل إنما قال: ادعوا لي خليلي أو قال حبيبي فرجونا أن تكونا أنتما هما، فجاءه أمير المؤمنين عليه السلام وألزق رسول الله صلى الله عليه وآله صدره بصدره وأومأ إلى اذنه فحدثه بألف حديث لكل حديث ألف باب",
+   "english": "28-42 (The compiler of the book narrated) that his father, Muhammad ibn al-Hassan ibn Ahmad ibn al-Valeed and Ahmad ibn Muhammad ibn Yahya al-Attar - may God be pleased with them - narrated that Sa’ed ibn Abdullah quoted Muhammad ibn al-Hussein ibn Abil-Khat’tab, on the authority of Ja’far ibn Bashir al-Bajaly and al-Hassan ibn Fazal, on the authority of Al-Masni ibn al-Valeed al-Han’nat, on the authority of Mansoor ibn Hazim, on the authority of Bakr ibn Habib, on the authority of Abi Ja’far al-Baqir (MGB), “When God’s Prophet (MGB) was so ill that he (MGB) was about to die, he (MGB) said, ‘Call in my friend.’ Then both Ayesha and Hafasa sent someone after their fathers (Abu Bakr and Umar). When they came in, God’s Prophet (MGB) covered up his face. Then Abu Bakr and Umar returned. Then the Prophet (MGB) uncovered his face and said, ‘Call in my friend.’ Again both Ayesha and Hafasa sent someone after their fathers - Abu Bakr and Umar. When they came in, God’s Prophet (MGB) covered up his face again. Then Abu Bakr and Umar said ‘We do not think that God’s Prophet (MGB) wants to see us.’ Ayesha and Hafasa said ‘When the Prophet (MGB) said ‘Call in my friend’ we hoped that he (MGB) wants to see you.’ Meanwhile the Commander of the Faithful Imam Ali (MGB) came in. When the Prophet (MGB) saw Ali (MGB), he hugged him and whispered one-thousand narrations to him each of which has one-thousand chapters.”",
+   "source": "Shaykh Muḥammad b. ʿAlī al-Ṣaduq",
+   "gradings": [],
+   "related": [
+    {
+     "url": "https://thaqalayn.net/hadith/10/29/8/33",
+     "title": "Thaqalayn Source"
+    }
+   ],
+   "history": [],
+   "englishContent": "Call in my friend.’ Then both Ayesha and Hafasa sent someone after their fathers (Abu Bakr and Umar). When they came in, God’s Prophet (MGB) covered up his face. Then Abu Bakr and Umar returned. Then the Prophet (MGB) uncovered his face and said, ‘Call in my friend.’ Again both Ayesha and Hafasa sent someone after their fathers - Abu Bakr and Umar. When they came in, God’s Prophet (MGB) covered up his face again. Then Abu Bakr and Umar said ‘We do not think that God’s Prophet (MGB) wants to see us.’ Ayesha and Hafasa said ‘When the Prophet (MGB) said ‘Call in my friend’ we hoped that he (MGB) wants to see you.’ Meanwhile the Commander of the Faithful Imam Ali (MGB) came in. When the Prophet (MGB) saw Ali (MGB), he hugged him and whispered one-thousand narrations to him each of which has one-thousand chapters.”",
+   "part_ar": "القسم الثامن والعشرون: في الخصال التي تزيد على الألف",
+   "chain_links_en": [
+    {
+     "p": "n000710",
+     "s": 47,
+     "t": "his father",
+     "e": 57,
+     "g": "ali-ibn-al-husayn-ibn-musa-ibn-babawayh"
+    },
+    {
+     "p": "n001068",
+     "s": 59,
+     "t": "Muhammad ibn al-Hassan ibn Ahmad ibn al-Valeed",
+     "e": 105,
+     "g": "muhammad-ibn-al-hasan-ibn-ahmad-ibn-al-walid"
+    },
+    {
+     "p": "n016517",
+     "s": 110,
+     "t": "Ahmad ibn Muhammad ibn Yahya al-Attar",
+     "e": 147,
+     "g": "ahmad-ibn-muhammad-ibn-yahya-al-attar"
+    },
+    {
+     "p": "n000492",
+     "s": 195,
+     "t": "Sa’ed ibn Abdullah",
+     "e": 213,
+     "g": "sad-ibn-abdullah-ibn-abi-khalaf"
+    },
+    {
+     "p": "n000923",
+     "s": 221,
+     "t": "Muhammad ibn al-Hussein ibn Abil-Khat’tab",
+     "e": 262,
+     "g": "muhammad-ibn-al-husayn-ibn-abi-al-khattab"
+    },
+    {
+     "p": "n000325",
+     "s": 284,
+     "t": "Ja’far ibn Bashir al-Bajaly",
+     "e": 311,
+     "g": "jafar-ibn-bashir"
+    },
+    {
+     "p": "n001131",
+     "s": 357,
+     "t": "Al-Masni ibn al-Valeed al-Han’nat",
+     "e": 390,
+     "g": "muthanna-ibn-al-walid-al-hannat"
+    },
+    {
+     "p": "n001126",
+     "s": 412,
+     "t": "Mansoor ibn Hazim",
+     "e": 429,
+     "g": "mansur-ibn-hazim"
+    },
+    {
+     "p": "n067956",
+     "s": 451,
+     "t": "Bakr ibn Habib",
+     "e": 465,
+     "g": "bakr-ibn-habib"
+    },
+    {
+     "p": "i05",
+     "s": 487,
+     "t": "Abi Ja’far",
+     "e": 497,
+     "g": "muhammad-al-baqir"
+    }
+   ],
+   "chain_links": [
+    {
+     "p": "n000710",
+     "s": 12,
+     "t": "أبي",
+     "e": 15,
+     "g": "ali-ibn-al-husayn-ibn-musa-ibn-babawayh"
+    },
+    {
+     "p": "n001068",
+     "s": 18,
+     "t": "محمد بن الحسن بن أحمد بن الوليد",
+     "e": 49,
+     "g": "muhammad-ibn-al-hasan-ibn-ahmad-ibn-al-walid"
+    },
+    {
+     "p": "n016517",
+     "s": 52,
+     "t": "أحمد بن محمد بن يحيى العطار",
+     "e": 79,
+     "g": "ahmad-ibn-muhammad-ibn-yahya-al-attar"
+    },
+    {
+     "p": "n000492",
+     "s": 107,
+     "t": "سعد بن عبد الله",
+     "e": 122,
+     "g": "sad-ibn-abdullah-ibn-abi-khalaf"
+    },
+    {
+     "p": "n000923",
+     "s": 127,
+     "t": "محمد بن الحسين بن أبي الخطاب",
+     "e": 155,
+     "g": "muhammad-ibn-al-husayn-ibn-abi-al-khattab"
+    },
+    {
+     "p": "n000325",
+     "s": 160,
+     "t": "جعفر بن بشير البجلي",
+     "e": 179,
+     "g": "jafar-ibn-bashir"
+    },
+    {
+     "p": "n000085",
+     "s": 182,
+     "t": "الحسن بن علي بن فضال",
+     "e": 202,
+     "g": "al-hasan-ibn-ali-ibn-faddal"
+    },
+    {
+     "p": "n001131",
+     "s": 207,
+     "t": "المثنى بن الوليد الحناط",
+     "e": 230,
+     "g": "muthanna-ibn-al-walid-al-hannat"
+    },
+    {
+     "p": "n001126",
+     "s": 235,
+     "t": "منصور بن حازم",
+     "e": 248,
+     "g": "mansur-ibn-hazim"
+    },
+    {
+     "p": "n067956",
+     "s": 253,
+     "t": "بكر بن حبيب",
+     "e": 264,
+     "g": "bakr-ibn-habib"
+    },
+    {
+     "p": "i05",
+     "s": 269,
+     "t": "أبي جعفر",
+     "e": 277,
+     "g": "muhammad-al-baqir"
+    }
+   ],
+   "arabicChain": "28-42 حدثنا <a class=\"chain-name\" href=\"/narrator/n000710/ali-ibn-al-husayn-ibn-musa-ibn-babawayh\">أبي</a>، و<a class=\"chain-name\" href=\"/narrator/n001068/muhammad-ibn-al-hasan-ibn-ahmad-ibn-al-walid\">محمد بن الحسن بن أحمد بن الوليد</a>، و<a class=\"chain-name\" href=\"/narrator/n016517/ahmad-ibn-muhammad-ibn-yahya-al-attar\">أحمد بن محمد بن يحيى العطار</a> رضي الله عنهم قالوا: حدثنا <a class=\"chain-name\" href=\"/narrator/n000492/sad-ibn-abdullah-ibn-abi-khalaf\">سعد بن عبد الله</a>، عن <a class=\"chain-name\" href=\"/narrator/n000923/muhammad-ibn-al-husayn-ibn-abi-al-khattab\">محمد بن الحسين بن أبي الخطاب</a>، عن <a class=\"chain-name\" href=\"/narrator/n000325/jafar-ibn-bashir\">جعفر بن بشير البجلي</a>، و<a class=\"chain-name\" href=\"/narrator/n000085/al-hasan-ibn-ali-ibn-faddal\">الحسن بن علي بن فضال</a>، عن <a class=\"chain-name\" href=\"/narrator/n001131/muthanna-ibn-al-walid-al-hannat\">المثنى بن الوليد الحناط</a>، عن <a class=\"chain-name\" href=\"/narrator/n001126/mansur-ibn-hazim\">منصور بن حازم</a>، عن <a class=\"chain-name\" href=\"/narrator/n067956/bakr-ibn-habib\">بكر بن حبيب</a>، عن <a class=\"chain-name\" href=\"/narrator/i05/muhammad-al-baqir\">أبي جعفر</a> عليه السلام قال",
+   "section_ar": "القسم 8",
+   "llm_similar": [
+    {
+     "reason": "Another parallel narration of the same hadith with additional details. The Prophet asks for his khalil, Ayesha and Hafsa send for Abu Bakr and Umar who are turned away (twice), then Ali is called. The Prophet presses his chest to Ali's chest and whispers 'a thousand hadith, each with a thousand doors.' Same core narrative.",
+     "match_type": "wording",
+     "id": "Al-Khisal-Saduq:1251"
+    },
+    {
+     "reason": "Same narrative: The Prophet's final illness, calling for his 'friend,' the wives sending for their fathers who are turned away, then Ali is called and the Prophet speaks closely with him. When asked what was said, Ali reports being told a thousand hadith each with a thousand doors. Same event with slightly different wording.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:1256"
+    },
+    {
+     "reason": "Same core narrative: Prophet in final illness says 'call my friend.' Abu Bakr and Umar are sent but Prophet covers his face. Ali is called and Prophet converses with him about a thousand hadith each opening a thousand doors. Very close parallel narration with near-identical wording.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:1249"
+    },
+    {
+     "reason": "Same hadith: Prophet in final illness calls for his khalil/habib, Aisha and Hafsa send for their fathers who are turned away, Ali is called and the Prophet whispers to him. Ali reports a thousand hadith each with a thousand doors. More detailed narration with wives' names specified.",
+     "match_type": "conceptual",
+     "id": "Al-Khisal-Saduq:1260"
+    }
+   ],
+   "source_ar": "الشيخ محمد بن علي الصدوق",
+   "semantic_matn_source": "قال رسول الله في مرضه الذي قبض فيه: ادعوا لي خليلي فأرسلت عائشة وحفصة إلى أبويهما فلما جاء اغطى رسول الله وجهه ورأسه، فانصرفا فكشف رأسه رسول الله ثم قال: ادعوا لي خليلي فأرسلت حفصة إلى أبيها وعائشة إلى أبيها فلما جاء اغطى رسول الله وجهه، فانطلقا وقالا: ما نرى رسول الله أرادنا، قالتا: أجل إنما قال: ادعوا لي خليلي أو قال حبيبي فرجونا أن تكونا أنتما هما، فجاءه أمير المؤمنين وألزق رسول الله صدره بصدره وأومأ إلى اذنه فحدثه بألف حديث لكل حديث ألف باب",
+   "chapter_ar": "كلم الله موسى بمائة وأربعة وعشرين ألف كلمة",
+   "englishChain": "28-42 (The compiler of the book narrated) that <a class=\"chain-name\" href=\"/narrator/n000710/ali-ibn-al-husayn-ibn-musa-ibn-babawayh\">his father</a>, <a class=\"chain-name\" href=\"/narrator/n001068/muhammad-ibn-al-hasan-ibn-ahmad-ibn-al-walid\">Muhammad ibn al-Hassan ibn Ahmad ibn al-Valeed</a> and <a class=\"chain-name\" href=\"/narrator/n016517/ahmad-ibn-muhammad-ibn-yahya-al-attar\">Ahmad ibn Muhammad ibn Yahya al-Attar</a> - may God be pleased with them - narrated that <a class=\"chain-name\" href=\"/narrator/n000492/sad-ibn-abdullah-ibn-abi-khalaf\">Sa’ed ibn Abdullah</a> quoted <a class=\"chain-name\" href=\"/narrator/n000923/muhammad-ibn-al-husayn-ibn-abi-al-khattab\">Muhammad ibn al-Hussein ibn Abil-Khat’tab</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/n000325/jafar-ibn-bashir\">Ja’far ibn Bashir al-Bajaly</a> and al-Hassan ibn Fazal, on the authority of <a class=\"chain-name\" href=\"/narrator/n001131/muthanna-ibn-al-walid-al-hannat\">Al-Masni ibn al-Valeed al-Han’nat</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/n001126/mansur-ibn-hazim\">Mansoor ibn Hazim</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/n067956/bakr-ibn-habib\">Bakr ibn Habib</a>, on the authority of <a class=\"chain-name\" href=\"/narrator/i05/muhammad-al-baqir\">Abi Ja’far</a> al-Baqir (MGB), “When God’s Prophet (MGB) was so ill that he (MGB) was about to die, he (MGB) said, ‘",
+   "arabicContent": "قال رسول الله صلى الله عليه وآله في مرضه الذي قبض فيه: ادعوا لي خليلي فأرسلت عائشة وحفصة إلى أبويهما فلما جاء اغطى رسول الله صلى الله عليه وآله وجهه ورأسه، فانصرفا فكشف رأسه رسول الله صلى الله عليه وآله ثم قال: ادعوا لي خليلي فأرسلت حفصة إلى أبيها وعائشة إلى أبيها فلما جاء اغطى رسول الله صلى الله عليه وآله وجهه، فانطلقا وقالا: ما نرى رسول الله صلى الله عليه وآله أرادنا، قالتا: أجل إنما قال: ادعوا لي خليلي أو قال حبيبي فرجونا أن تكونا أنتما هما، فجاءه أمير المؤمنين عليه السلام وألزق رسول الله صلى الله عليه وآله صدره بصدره وأومأ إلى اذنه فحدثه بألف حديث لكل حديث ألف باب",
+   "chain_people": [
+    {
+     "p": "n000710",
+     "s": 12,
+     "t": "أبي",
+     "e": 15,
+     "g": "ali-ibn-al-husayn-ibn-musa-ibn-babawayh",
+     "k": "relative",
+     "o": "convention"
+    },
+    {
+     "p": "n001068",
+     "s": 18,
+     "t": "محمد بن الحسن بن أحمد بن الوليد",
+     "e": 49,
+     "g": "muhammad-ibn-al-hasan-ibn-ahmad-ibn-al-walid",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n016517",
+     "s": 52,
+     "t": "أحمد بن محمد بن يحيى العطار",
+     "e": 79,
+     "g": "ahmad-ibn-muhammad-ibn-yahya-al-attar",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n000492",
+     "s": 107,
+     "t": "سعد بن عبد الله",
+     "e": 122,
+     "g": "sad-ibn-abdullah-ibn-abi-khalaf",
+     "k": "name",
+     "o": "chosen"
+    },
+    {
+     "p": "n000923",
+     "s": 127,
+     "t": "محمد بن الحسين بن أبي الخطاب",
+     "e": 155,
+     "g": "muhammad-ibn-al-husayn-ibn-abi-al-khattab",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n000325",
+     "s": 160,
+     "t": "جعفر بن بشير البجلي",
+     "e": 179,
+     "g": "jafar-ibn-bashir",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n000085",
+     "s": 182,
+     "t": "الحسن بن علي بن فضال",
+     "e": 202,
+     "g": "al-hasan-ibn-ali-ibn-faddal",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n001131",
+     "s": 207,
+     "t": "المثنى بن الوليد الحناط",
+     "e": 230,
+     "g": "muthanna-ibn-al-walid-al-hannat",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n001126",
+     "s": 235,
+     "t": "منصور بن حازم",
+     "e": 248,
+     "g": "mansur-ibn-hazim",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "n067956",
+     "a": 1,
+     "s": 253,
+     "t": "بكر بن حبيب",
+     "e": 264,
+     "g": "bakr-ibn-habib",
+     "k": "name",
+     "o": "one"
+    },
+    {
+     "p": "i05",
+     "s": 269,
+     "t": "أبي جعفر",
+     "e": 277,
+     "g": "muhammad-al-baqir",
+     "k": "imam",
+     "o": "chosen"
+    }
+   ],
+   "semantic_significant_terms_source": "اغطي خليلي ادعوا ارسلت حفصه عايشه",
+   "book_ar": "الخصال",
+   "semantic_english_hint_source": "Call in my friend.’ Then both Ayesha and Hafasa sent someone after their fathers (Abu Bakr and Umar). When they came in,"
+  }
+ ],
+ "totalResultSetSize": 1281,
+ "baseResultSetSize": 1281,
+ "topicTagFacets": {
+  "ahl-al-bayt": 158,
+  "imam-ali": 124,
+  "good-deeds": 113,
+  "prophet-muhammad": 103,
+  "food-drink": 62,
+  "twelve-imams": 60,
+  "paradise": 57,
+  "health-hygiene": 54,
+  "wisdom": 42,
+  "intellect": 39,
+  "patience": 39,
+  "quran": 39,
+  "dua": 36,
+  "resurrection": 34,
+  "women": 33,
+  "repentance": 31,
+  "sacrifice": 31,
+  "musa": 30,
+  "trade": 29,
+  "fasting": 27,
+  "spending": 27,
+  "creation": 26,
+  "death": 26,
+  "hellfire": 24,
+  "asceticism": 23,
+  "parents": 22,
+  "wealth-materialism": 21,
+  "worship": 21,
+  "justice": 20,
+  "friday-prayer": 19,
+  "prayer-etiquette": 19,
+  "taqwa": 18,
+  "wilayah": 18,
+  "brotherhood": 17,
+  "day-of-judgement": 17,
+  "adultery": 16,
+  "fear-of-god": 16,
+  "imam-mahdi": 16,
+  "divine-decree": 15,
+  "envy": 15,
+  "greed": 15,
+  "oppression": 15,
+  "truthfulness": 15,
+  "warfare-jihad": 15,
+  "alcohol": 14,
+  "angels": 14,
+  "disbelief": 14,
+  "governance": 14,
+  "love": 14,
+  "adam": 13,
+  "children": 13,
+  "children-of-israel": 13,
+  "ibrahim": 13,
+  "trials-afflictions": 13,
+  "chastity": 12,
+  "generosity": 12,
+  "guidance-misguidance": 12,
+  "marriage": 12,
+  "night-prayer": 12,
+  "silence": 12,
+  "enjoining-good": 11,
+  "etiquette": 11,
+  "gratitude": 11,
+  "hypocrisy": 11,
+  "mosque": 11,
+  "relatives": 11,
+  "satan-iblis": 11,
+  "travel-prayer": 11,
+  "trust-in-god": 11,
+  "zakat": 11,
+  "anger": 10,
+  "congregational-prayer": 10,
+  "dress-adornment": 10,
+  "imam-husayn": 10,
+  "penalties": 10,
+  "sincerity": 10,
+  "trustworthiness": 10,
+  "usury": 10,
+  "burial": 9,
+  "christians-jews": 9,
+  "nuh": 9,
+  "remembrance": 9,
+  "arrogance": 8,
+  "backbiting-slander": 8,
+  "community": 8,
+  "contentment": 8,
+  "fatimah": 8,
+  "glorification": 8,
+  "humility": 8,
+  "imam-hasan": 8,
+  "intercession": 8,
+  "isa": 8,
+  "lying": 8,
+  "major-sins": 8,
+  "modesty": 8,
+  "ramadan": 8,
+  "mercy": 7,
+  "poor-needy": 7,
+  "puberty": 7,
+  "wudu": 7,
+  "debt-loans": 6,
+  "forgiveness": 6,
+  "heedlessness": 6,
+  "menstruation": 6,
+  "orphans": 6,
+  "pharaoh": 6,
+  "revelation": 6,
+  "throne-of-god": 6,
+  "circumcision": 5,
+  "ghusl": 5,
+  "good-character": 5,
+  "good-temper": 5,
+  "khums": 5,
+  "names-of-god": 5,
+  "prophetic-medicine": 5,
+  "rights": 5,
+  "shirk": 5,
+  "slavery-captives": 5,
+  "sulayman": 5,
+  "taqiyyah": 5,
+  "certainty": 4,
+  "funeral-prayer": 4,
+  "gambling": 4,
+  "jurisprudence": 4,
+  "migration": 4,
+  "prostration": 4,
+  "reappearance-signs": 4,
+  "secret": 4,
+  "signs-of-god": 4,
+  "unseen": 4,
+  "yusuf": 4,
+  "blood-money": 3,
+  "courage": 3,
+  "dawud": 3,
+  "divorce": 3,
+  "enemies": 3,
+  "funeral-procession": 3,
+  "good-company": 3,
+  "imam-zayn-al-abidin": 3,
+  "jinn": 3,
+  "lut": 3,
+  "mockery-ridicule": 3,
+  "neighbors": 3,
+  "parable": 3,
+  "sexual-ethics": 3,
+  "soul": 3,
+  "tawaf": 3,
+  "animal-welfare": 2,
+  "animals": 2,
+  "aqiqah": 2,
+  "ayyub": 2,
+  "call-to-prayer": 2,
+  "divine-knowledge": 2,
+  "imam-ja-far": 2,
+  "intention": 2,
+  "magic-sorcery": 2,
+  "martyrdom": 2,
+  "miracle": 2,
+  "mourning-condolence": 2,
+  "naming": 2,
+  "narrator-criticism": 2,
+  "scriptures": 2,
+  "slavery": 2,
+  "tanzih": 2,
+  "testimony-judgment": 2,
+  "betrayal": 1,
+  "boasting": 1,
+  "corruption": 1,
+  "eclipse-prayer": 1,
+  "endowments-gifts": 1,
+  "expiation": 1,
+  "historical-event": 1,
+  "historical-figure": 1,
+  "hunting-slaughter": 1,
+  "inheritance": 1,
+  "karbala": 1,
+  "knowledge": 1,
+  "light-darkness": 1,
+  "poverty": 1,
+  "prayer": 1,
+  "previous-nations": 1,
+  "professions": 1,
+  "prophet-ismail": 1,
+  "security-safety": 1,
+  "sirat-bridge": 1,
+  "tayammum": 1,
+  "ulul-azm": 1,
+  "umrah": 1,
+  "will": 1,
+  "women-obedience": 1,
+  "yunus": 1,
+  "ziyarat": 1
+ }
+}

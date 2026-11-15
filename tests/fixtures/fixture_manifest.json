@@ -1,0 +1,14 @@
+{
+  "books.json": {
+    "source": "https://rewayaat.info/v1/browse/books",
+    "fetched_at": "2026-11-15",
+    "count": 21,
+    "sha256": "9e38bdaecc0411eb1e95c0d499782421d1655fe8db62de69b70b4f0aac336dcd"
+  },
+  "lookup_khisal_p1.json": {
+    "source": "https://rewayaat.info/v1/narrations?q=book:%22Al-Khiṣāl%22&sort_fields=book,number&page=1&per_page=3",
+    "fetched_at": "2026-11-15",
+    "count": 3,
+    "sha256": "325942807e57d314aea4f7bb3f52d19355bbb7b95ce744e130be5f4341ae2512"
+  }
+}

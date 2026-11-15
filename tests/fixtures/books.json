@@ -1,0 +1,128 @@
+[
+ {
+  "nameAr": "الأمالي",
+  "name": "Al-Amālī",
+  "count": 1469,
+  "slug": "al-amali"
+ },
+ {
+  "nameAr": "الخصال",
+  "name": "Al-Khiṣāl",
+  "count": 1281,
+  "slug": "al-khisal"
+ },
+ {
+  "nameAr": "الكافي",
+  "name": "Al-Kāfi",
+  "count": 14242,
+  "slug": "al-kafi"
+ },
+ {
+  "nameAr": "التوحيد",
+  "name": "Al-Tawḥīd",
+  "count": 574,
+  "slug": "al-tawhid"
+ },
+ {
+  "nameAr": "فضائل الشيعة",
+  "name": "Faḍaʾil al-Shīʿa",
+  "count": 45,
+  "slug": "fada-il-al-shi-a"
+ },
+ {
+  "nameAr": "غرر الحكم ودرر الكلم",
+  "name": "Ghurar al-Ḥikam",
+  "count": 11012,
+  "slug": "ghurar-al-hikam"
+ },
+ {
+  "nameAr": "كتاب الغيبة",
+  "name": "Kitāb al-Ghayba",
+  "count": 1241,
+  "slug": "kitab-al-ghayba"
+ },
+ {
+  "nameAr": "كتاب المؤمن",
+  "name": "Kitāb al-Muʾmin",
+  "count": 201,
+  "slug": "kitab-al-mu-min"
+ },
+ {
+  "nameAr": "كتاب الزهد",
+  "name": "Kitāb al-Zuhd",
+  "count": 290,
+  "slug": "kitab-al-zuhd"
+ },
+ {
+  "nameAr": "كتاب الضعفاء",
+  "name": "Kitāb al-Ḍuʿafāʾ",
+  "count": 226,
+  "slug": "kitab-al-du-afa"
+ },
+ {
+  "nameAr": "كامل الزيارات",
+  "name": "Kāmil al-Ziyārāt",
+  "count": 750,
+  "slug": "kamil-al-ziyarat"
+ },
+ {
+  "nameAr": "من لا يحضره الفقيه",
+  "name": "Man Lā Yaḥḍuruh al-Faqīh",
+  "count": 6379,
+  "slug": "man-la-yahduruh-al-faqih"
+ },
+ {
+  "nameAr": "معاني الأخبار",
+  "name": "Maʿānī al-ʾAkhbār",
+  "count": 829,
+  "slug": "ma-ani-al-akhbar"
+ },
+ {
+  "nameAr": "مشكاة الأنوار في غرر الأخبار",
+  "name": "Mishkāt al-Anwār",
+  "count": 1895,
+  "slug": "mishkat-al-anwar"
+ },
+ {
+  "nameAr": "معجم الأحاديث المعتبرة",
+  "name": "Muʿjam al-Aḥādīth al-Muʿtabara",
+  "count": 555,
+  "slug": "mu-jam-al-ahadith-al-mu-tabara"
+ },
+ {
+  "nameAr": "ميزان الحكمة",
+  "name": "Mīzān al-Ḥikma",
+  "count": 4612,
+  "slug": "mizan-al-hikma"
+ },
+ {
+  "nameAr": "نهج البلاغة",
+  "name": "Nahj al-Balāgha",
+  "count": 2260,
+  "slug": "nahj-al-balagha"
+ },
+ {
+  "nameAr": "رسالة الحقوق",
+  "name": "Risālat al-Ḥuqūq",
+  "count": 49,
+  "slug": "risalat-al-huquq"
+ },
+ {
+  "nameAr": "ثواب الأعمال وعقاب الأعمال",
+  "name": "Thawāb al-Aʿmāl wa ʿiqāb al-Aʿmāl",
+  "count": 1106,
+  "slug": "thawab-al-a-mal-wa-iqab-al-a-mal"
+ },
+ {
+  "nameAr": "عيون أخبار الرضا",
+  "name": "ʿUyūn akhbār al-Riḍā",
+  "count": 951,
+  "slug": "uyun-akhbar-al-rida"
+ },
+ {
+  "nameAr": "صفات الشيعة",
+  "name": "Ṣifāt al-Shīʿa",
+  "count": 71,
+  "slug": "sifat-al-shi-a"
+ }
+]
