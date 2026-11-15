@@ -235,7 +235,7 @@ license is confirmed** (manifest license: {config.HF_LICENSE}).
 |---|---|
 | `source_id` | Stable doc id from the API (`{{book}}:{{number}}`) |
 | `book` / `chapter` / `hadith_number` | Bibliographic position |
-| `narrator` | First narrator in the chain, if present |
+| `narrator` | Last `chain_people` entry (chain terminus), if present |
 | `arabic` / `english` | Full text, NFKC-normalized |
 | `metadata` | All other raw fields as canonical JSON |
 | `fetched_at` | ISO timestamp of the fetch |
