@@ -166,11 +166,11 @@ def _core_metrics(conn: sqlite3.Connection, month: str, new_snap_id: str,
     if new_meta is None:
         raise ValueError(f"unknown snapshot: {new_snap_id!r}")
     docs_total, new_raw_path, new_books = new_meta
-    new_raw = _raw_index(Path(new_raw_path))
+    new_raw = _raw_index(store.resolve_raw_path(new_raw_path))
 
     old_meta = _snap_meta(conn, old_snap_id) if old_snap_id else None
     old_total = old_meta[0] if old_meta else 0
-    old_raw = _raw_index(Path(old_meta[1])) if old_meta else {}
+    old_raw = _raw_index(store.resolve_raw_path(old_meta[1])) if old_meta else {}
     old_books = old_meta[2] if old_meta else {}
 
     new_sids: list[str] = []
@@ -202,7 +202,7 @@ def _core_metrics(conn: sqlite3.Connection, month: str, new_snap_id: str,
         for lang, n in _sentences_of(old_raw.get(sid, {}).get("raw")).items():
             sent[lang]["removed"] += n
 
-    ensure_sentence_totals(conn, new_snap_id, Path(new_raw_path))
+    ensure_sentence_totals(conn, new_snap_id, store.resolve_raw_path(new_raw_path))
     totals = _sentence_totals(conn, new_snap_id)
 
     def _pct(part: int, whole: int) -> float:

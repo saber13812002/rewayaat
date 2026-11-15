@@ -41,7 +41,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import config
+from . import config, http
 
 # LOOKUP max_result_window: totals clamp here; from >= this returns size=0.
 MAX_PAGE_SIZE: int = 10000
@@ -85,6 +85,24 @@ class SnapshotResult:
     books: dict[str, int]    # per-book unique doc counts
     incomplete: list[str]    # book names not matching live counts
     duration_s: float
+
+
+def _lookup_with_retry(fetcher, query: str, page: int, per_page: int):
+    """fetcher.lookup with page-level retry on HttpError / HttpStatusError.
+
+    The HTTP layer already retries per request (MAX_RETRIES); this outer loop
+    re-attempts the *page* if the whole request still fails (e.g. a transient
+    server outage spanning several requests). Each attempt re-issues the same
+    idempotent lookup, so a retry never duplicates data: the finalize pass
+    dedupes by source_id. Backoff is exponential from config.SNAPSHOT_PAGE_BACKOFF_S.
+    """
+    for attempt in range(1, config.SNAPSHOT_PAGE_RETRIES + 1):
+        try:
+            return fetcher.lookup(query, page, per_page)
+        except (http.HttpError, http.HttpStatusError):
+            if attempt >= config.SNAPSHOT_PAGE_RETRIES:
+                raise
+            time.sleep(config.SNAPSHOT_PAGE_BACKOFF_S * attempt)
 
 
 def query_for(q: Query) -> str:
@@ -264,7 +282,7 @@ def run_snapshot(
         total = state["totals"].get(q.label)
         first_docs = None
         if total is None:
-            first = fetcher.lookup(query_for(q), 1, per_page)
+            first = _lookup_with_retry(fetcher, query_for(q), 1, per_page)
             total = first.total
             first_docs = first.collection
             state["totals"][q.label] = total
@@ -276,7 +294,7 @@ def run_snapshot(
             if page == 1 and first_docs is not None:
                 res = LookupResult(total=total, collection=first_docs)
             else:
-                res = fetcher.lookup(query_for(q), page, per_page)
+                res = _lookup_with_retry(fetcher, query_for(q), page, per_page)
             _append_page(dest, res.collection, q.book, clock(), page, q.label)
             done.add(page)
             state["completed"][q.label] = sorted(done)
@@ -313,12 +331,12 @@ def run_snapshot(
                 continue
             tried.add(n)
             rq = Query(book=name, chapter=None, label=f"book:{name} number:{n}", expected_count=0, kind="number", number=n)
-            first = fetcher.lookup(query_for(rq), 1, per_page)
+            first = _lookup_with_retry(fetcher, query_for(rq), 1, per_page)
             count += _count_new(first.collection, seen_ids)
             _append_page(dest, first.collection, name, clock(), 1, rq.label)
             pages = (first.total + per_page - 1) // per_page if first.total else 0
             for page in range(2, pages + 1):
-                res = fetcher.lookup(query_for(rq), page, per_page)
+                res = _lookup_with_retry(fetcher, query_for(rq), page, per_page)
                 count += _count_new(res.collection, seen_ids)
                 _append_page(dest, res.collection, name, clock(), page, rq.label)
             state["repair_tried"][name] = sorted(tried)

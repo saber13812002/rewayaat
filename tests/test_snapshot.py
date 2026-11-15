@@ -16,11 +16,12 @@ All tests use FakeFetcher (dict-driven) — no live network.
 
 import json
 import re
+import time
 from pathlib import Path
 
 import pytest
 
-from corpus_sync import snapshot
+from corpus_sync import config, http as http_mod, snapshot
 from corpus_sync.fetch import Book
 
 PER_PAGE = 10
@@ -285,3 +286,45 @@ def test_query_for_each_kind():
     assert snapshot.query_for(q) == 'book:"B" chapter:"*Allah sent down His comfort...* (9:40)"'
     q = snapshot.Query(book="B", chapter="One", label="x", expected_count=0, kind="number", number="571")
     assert snapshot.query_for(q) == 'book:"B" number:"571"'
+
+
+# --- page-level retry (T10 live-run hardening) ---------------------------------
+
+
+class _FlakyFetcher:
+    """Wraps a fetcher; raises HttpError on the first N lookup calls."""
+
+    def __init__(self, inner, fail_first=1):
+        self.inner = inner
+        self.fail_first = fail_first
+        self.n = 0
+
+    def books(self):
+        return self.inner.books()
+
+    def lookup(self, q, page, per_page=PER_PAGE):
+        self.n += 1
+        if self.n <= self.fail_first:
+            raise http_mod.HttpError("https://rewayaat.info/v1/narrations", self.n)
+        return self.inner.lookup(q, page, per_page)
+
+
+def test_page_http_error_retried_and_recovers(tmp_data_dir, monkeypatch):
+    # One transient read-timeout on the first page must not kill the run.
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    fetcher = _FlakyFetcher(FakeFetcher({"Small": _small_data(300)}), fail_first=1)
+    res = snapshot.run_snapshot(dest=None, fetcher=fetcher, clock=lambda: "T1", per_page=PER_PAGE)
+    assert res.incomplete == []
+    lines = [json.loads(x) for x in res.path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    assert len(lines) == 300
+    # 30 pages + 1 extra call for the retried first page
+    assert fetcher.n == 31
+
+
+def test_page_http_error_exhausts_and_raises(tmp_data_dir, monkeypatch):
+    # Persistent failure: page-level retries are exhausted, HttpError propagates.
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    fetcher = _FlakyFetcher(FakeFetcher({"Small": _small_data(300)}), fail_first=99)
+    with pytest.raises(http_mod.HttpError):
+        snapshot.run_snapshot(dest=None, fetcher=fetcher, clock=lambda: "T1", per_page=PER_PAGE)
+    assert fetcher.n == config.SNAPSHOT_PAGE_RETRIES

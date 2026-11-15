@@ -4,9 +4,11 @@
 Subcommands (all exit 0 on success, 1 on failure; artifacts are UTF-8
 files under ``DATA_DIR/out/``):
 
-- ``snapshot [--strict]``  fetch the full corpus into a new raw JSONL
-  snapshot, normalize every doc into the store, and write
-  ``out/snapshot-<id>.summary.json``.
+- ``snapshot [--strict] [--resume]``  fetch the full corpus into a new raw
+  JSONL snapshot, normalize every doc into the store, and write
+  ``out/snapshot-<id>.summary.json``. ``--resume`` continues the in-progress
+  snapshot named by ``DATA_DIR/state/snapshot_state.json`` instead of
+  starting a fresh one (a crashed run can be picked up where it stopped).
 - ``detect``               diff the latest two complete snapshots and
   write ``out/changes-<new_id>.json``.
 - ``analyze --month YYYY-MM``  compute monthly metrics and write
@@ -30,7 +32,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import analytics, config, detect, normalize, publish, snapshot, store
+from . import analytics, config, detect, http, normalize, publish, snapshot, store
 
 LOCK_NAME = "sync.lock"
 _LOCK_MAX_AGE_S = 24 * 3600
@@ -105,7 +107,30 @@ def _cmd_snapshot(args) -> int:
               "another sync may be running.")
         return 1
     try:
-        result = snapshot.run_snapshot(strict=args.strict)
+        dest = None
+        if getattr(args, "resume", False):
+            state_path = config.STATE_DIR / snapshot.STATE_FILE
+            if not state_path.is_file():
+                print("ERROR: --resume given but no in-progress snapshot state "
+                      f"file found ({state_path}).")
+                return 1
+            try:
+                st = json.loads(state_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                print(f"ERROR: --resume state file is unreadable ({state_path}).")
+                return 1
+            dest = config.RAW_DIR / st.get("snapshot", "")
+            if not dest.is_file():
+                has_progress = bool(st.get("completed"))
+                if has_progress:
+                    print(f"ERROR: --resume state claims completed pages but the "
+                          f"snapshot file is missing ({dest}); refusing to resume "
+                          "silently (completed pages would be lost).")
+                    return 1
+                # No page had landed before the crash: safe to recreate the file.
+                print(f"note: --resume snapshot file missing, none fetched; "
+                      f"creating {dest.name} fresh.")
+        result = snapshot.run_snapshot(dest=dest, strict=args.strict)
         snap_id = result.path.stem  # snapshot-YYYYMMDD-HHMMSS-<seq>
         snap_id = "-".join(snap_id.split("-")[1:])  # YYYYMMDD-HHMMSS-<seq>
         conn = store.open_db()
@@ -236,6 +261,9 @@ def build_parser() -> argparse.ArgumentParser:
                                          "snapshot and store it")
     sp.add_argument("--strict", action="store_true",
                     help="fail (exit 1) if any book is incomplete")
+    sp.add_argument("--resume", action="store_true",
+                    help="continue the in-progress snapshot named by "
+                         "DATA_DIR/state/snapshot_state.json")
     sp.set_defaults(func=_cmd_snapshot)
 
     dp = sub.add_parser("detect", help="diff the latest two complete snapshots")
@@ -261,7 +289,7 @@ def main(argv: list[str] | None = None) -> int:
         return args.func(args)
     except (snapshot.IncompleteSnapshotError,
             detect.IncompleteSnapshotError,
-            publish.PublishError, OSError) as exc:
+            publish.PublishError, http.HttpError, OSError) as exc:
         print(f"ERROR: {exc}")
         return 1
 

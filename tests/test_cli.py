@@ -18,7 +18,7 @@ from pathlib import Path
 
 import huggingface_hub
 
-from corpus_sync import cli, config, fetch as fetch_mod, snapshot, store
+from corpus_sync import cli, config, fetch as fetch_mod, http as http_mod, snapshot, store
 from corpus_sync.fetch import Book
 
 FIX = Path(__file__).parent / "fixtures" / "e2e_snapshots"
@@ -247,3 +247,95 @@ def test_validate_subcommand(tmp_data_dir, monkeypatch):
     monkeypatch.setattr(fetch_mod, "books",
                         lambda: [Book(name=BOOK, name_ar="x", slug="fadail", count=45)])
     assert cli.main(["validate"]) == 1
+
+
+# --- snapshot --resume (T10 live-run hardening) --------------------------------
+
+
+def test_snapshot_resume_uses_state_dest(tmp_data_dir, monkeypatch):
+    # A previous run left state + a half-fetched file; --resume continues it.
+    first = _install_fetch(monkeypatch, _mini_docs(5))
+    assert cli.main(["snapshot"]) == 0
+    # Find the first snapshot file + record its state name.
+    state = json.loads((config.STATE_DIR / snapshot.STATE_FILE).read_text(encoding="utf-8"))
+    dest_name = state["snapshot"]
+    dest = config.RAW_DIR / dest_name
+    assert dest.is_file()
+    # Simulate a crash: truncate state so page 1 is not "completed".
+    state["completed"] = {}
+    (config.STATE_DIR / snapshot.STATE_FILE).write_text(json.dumps(state), encoding="utf-8")
+    dest.write_text("", encoding="utf-8")
+
+    second = _install_fetch(monkeypatch, _mini_docs(5))
+    rc = cli.main(["snapshot", "--resume"])
+    assert rc == 0
+    # Resumed the SAME file (no new snapshot file), re-fetched from scratch.
+    raw_files = list((config.RAW_DIR).glob("*.jsonl"))
+    assert [p.name for p in raw_files] == [dest_name]
+    assert second.calls >= 1
+    # DB latest == the resumed snapshot id (dest is "snapshot-<id>.jsonl")
+    conn = store.open_db()
+    expected_id = "-".join(dest.stem.split("-")[1:])
+    assert store.latest_snapshot(conn) == expected_id
+
+
+def test_snapshot_resume_without_state_fails(tmp_data_dir, monkeypatch):
+    # No prior state file -> --resume has nothing to continue.
+    _install_fetch(monkeypatch, _mini_docs(5))
+    rc = cli.main(["snapshot", "--resume"])
+    assert rc == 1
+    assert list((config.RAW_DIR).glob("*.jsonl")) == []
+
+
+def test_snapshot_resume_missing_file_with_empty_state(tmp_data_dir, monkeypatch):
+    # Crash before any page landed: state exists, snapshot file does not.
+    # Resume is allowed (nothing was fetched); the file is created fresh.
+    state_dir = config.STATE_DIR
+    state_dir.mkdir(parents=True, exist_ok=True)
+    dest_name = "snapshot-20260101-000000-1.jsonl"
+    (state_dir / snapshot.STATE_FILE).write_text(
+        json.dumps({"snapshot": dest_name, "completed": {}, "totals": {},
+                    "repair_tried": {}, "sha256": ""}), encoding="utf-8")
+    _install_fetch(monkeypatch, _mini_docs(5))
+    rc = cli.main(["snapshot", "--resume"])
+    assert rc == 0
+    assert [p.name for p in (config.RAW_DIR).glob("*.jsonl")] == [dest_name]
+    conn = store.open_db()
+    assert store.latest_snapshot(conn) == "20260101-000000-1"
+
+
+def test_snapshot_resume_missing_file_with_progress_fails(tmp_data_dir, monkeypatch):
+    # State claims completed pages but the file is gone -> refuse: the
+    # completed pages cannot be verified, so resuming would silently drop them.
+    state_dir = config.STATE_DIR
+    state_dir.mkdir(parents=True, exist_ok=True)
+    dest_name = "snapshot-20260101-000000-1.jsonl"
+    (state_dir / snapshot.STATE_FILE).write_text(
+        json.dumps({"snapshot": dest_name, "completed": {"book:One": [1]},
+                    "totals": {"book:One": 5}, "repair_tried": {}, "sha256": ""}),
+        encoding="utf-8")
+    _install_fetch(monkeypatch, _mini_docs(5))
+    rc = cli.main(["snapshot", "--resume"])
+    assert rc == 1
+    assert list((config.RAW_DIR).glob("*.jsonl")) == []
+
+
+def test_snapshot_page_retry_on_live_error(tmp_data_dir, monkeypatch):
+    # CLI-level: a transient HttpError on the first page is retried, not fatal.
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    fake = _install_fetch(monkeypatch, _mini_docs(5))
+    inner = fake.lookup  # the dict-driven fake, not the live network function
+    calls = {"n": 0}
+
+    def flaky(q, page, per_page=config.PER_PAGE):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise http_mod.HttpError("https://rewayaat.info/v1/narrations", 1)
+        return inner(q, page, per_page)
+
+    # Replace the (already-installed) lookup with a flaky wrapper around the fake.
+    monkeypatch.setattr(fetch_mod, "lookup", flaky)
+    rc = cli.main(["snapshot"])
+    assert rc == 0
+    assert calls["n"] == 2
+    assert fake.calls == 1

@@ -13,6 +13,8 @@ REQUEST_TIMEOUT_S: int = 240        # live API variance: same query 1.2s..>120s
 MAX_RETRIES: int = 4                # attempts per request (1 + 3 retries)
 MIN_BACKOFF_S: float = 5.0          # exponential base: 5s, 10s, 20s, 40s
 RATE_LIMIT_PER_S: float = 2.0       # sustained request rate (token bucket)
+SNAPSHOT_PAGE_RETRIES: int = 3      # page-level attempts beyond the HTTP layer
+SNAPSHOT_PAGE_BACKOFF_S: float = 15.0  # base for page-level backoff (15s, 30s, 60s)
 
 # --- Local paths (working dir; gitignored) ----------------------------------
 DATA_DIR: Path = Path("data")

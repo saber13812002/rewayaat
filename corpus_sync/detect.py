@@ -101,10 +101,10 @@ def detect_changes(conn: sqlite3.Connection, *, old_snap_id: str,
 
     old_hashes = store.load_record_hashes(conn, old_snap_id)
     new_hashes = store.load_record_hashes(conn, new_snap_id)
-    old_raw = load_raw_index(Path(
+    old_raw = load_raw_index(store.resolve_raw_path(
         conn.execute("SELECT raw_path FROM snapshots WHERE id=?",
                      (old_snap_id,)).fetchone()[0]))
-    new_raw = load_raw_index(Path(
+    new_raw = load_raw_index(store.resolve_raw_path(
         conn.execute("SELECT raw_path FROM snapshots WHERE id=?",
                      (new_snap_id,)).fetchone()[0]))
 

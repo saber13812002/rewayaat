@@ -30,7 +30,7 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from . import analytics, config
+from . import analytics, config, store
 
 # Normalized record columns in dataset order (the `raw` doc rides along as
 # a nested JSON value so nothing is dropped from the normalized records).
@@ -69,7 +69,7 @@ def _raw_lines(conn: sqlite3.Connection, snap_id: str) -> list[dict]:
     if row is None:
         raise PublishError(f"unknown snapshot: {snap_id!r}")
     lines = []
-    with open(row[0], encoding="utf-8") as fh:
+    with open(store.resolve_raw_path(row[0]), encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()
             if line:
@@ -147,7 +147,7 @@ def build_dataset_dir(dest: Path, *, conn: sqlite3.Connection,
     # --- data/raw: byte-identical copy of the raw snapshot ------------------
     raw_row = conn.execute("SELECT raw_path FROM snapshots WHERE id=?",
                            (new_snap_id,)).fetchone()
-    shutil.copyfile(raw_row[0], dest / "data" / "raw" / f"{new_snap_id}.jsonl")
+    shutil.copyfile(store.resolve_raw_path(raw_row[0]), dest / "data" / "raw" / f"{new_snap_id}.jsonl")
 
     # --- changes: one line per NEW/MODIFIED/REMOVED doc ---------------------
     changes_jsonl = dest / "changes" / f"{month}.jsonl"

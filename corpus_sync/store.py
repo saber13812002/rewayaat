@@ -72,6 +72,17 @@ def record_snapshot(conn: sqlite3.Connection, *, snap_id: str, created_at: str,
     conn.commit()
 
 
+def resolve_raw_path(raw_path: str) -> Path:
+    """Absolute raw_path as stored, or relative to ``config.DATA_DIR``.
+
+    Relative paths keep the state portable (GitHub Actions restores the
+    artifact under a different absolute checkout than the one that wrote
+    it); absolute paths (legacy rows, local runs) pass through unchanged.
+    """
+    p = Path(raw_path)
+    return p if p.is_absolute() else config.DATA_DIR / p
+
+
 def snapshot_status(conn: sqlite3.Connection, snap_id: str) -> str | None:
     row = conn.execute(
         "SELECT status FROM snapshots WHERE id=?", (snap_id,)).fetchone()
