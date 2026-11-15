@@ -1,0 +1,226 @@
+# Weekly corpus sync for rewayaat.info (T11).
+#
+# Jobs:
+#   sync     always         fetch a new snapshot, detect changes vs previous
+#   monthly  needs sync     compute monthly metrics (schedule / auto / monthly)
+#   publish  needs monthly  stage + upload the HF dataset (needs HF_TOKEN)
+#
+# State continuity between runs:
+#   corpus-state  = data/db + data/state  (SQLite store + checkpoint)
+#   corpus-raw    = data/raw              (raw JSONL snapshots; the DB
+#                   stores raw_path relative to DATA_DIR, so the raw files
+#                   must be restored alongside the DB for detect/analyze/
+#                   publish to resolve them)
+#   Both are uploaded with if: always() so a partially completed run leaves a
+#   usable checkpoint for the next run.
+#
+# Concurrency: single group, cancel-in-progress false -> a new trigger waits
+# for the in-flight run (no concurrent syncs against the live API).
+#
+# Required secret: HF_TOKEN (Hugging Face). Without it, the publish step
+# warns and the run still succeeds with the dataset staged (but not uploaded).
+
+name: corpus-sync
+
+on:
+  schedule:
+    # Weekly, Sunday 03:00 UTC.
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "auto (snapshot+monthly), snapshot (only), monthly (only)"
+        type: choice
+        required: true
+        default: auto
+        options:
+          - auto
+          - snapshot
+          - monthly
+      month:
+        description: "Month for monthly compare / publish (YYYY-MM); default: current UTC month"
+        type: string
+        required: false
+        default: ""
+
+concurrency:
+  group: corpus-sync
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  sync:
+    name: snapshot + detect
+    runs-on: ubuntu-latest
+    timeout-minutes: 480   # a full corpus fetch takes ~1.5-2.5 h
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r corpus_sync/requirements.txt
+
+      # Restore previous run state (absent on the very first run).
+      - name: Download previous state
+        uses: actions/download-artifact@v4
+        with:
+          name: corpus-state
+          path: data
+          continue-on-error: true
+
+      - name: Download previous raw snapshots
+        uses: actions/download-artifact@v4
+        with:
+          name: corpus-raw
+          path: data
+          continue-on-error: true
+
+      # sync.lock is machine-scoped; a dead runner can leave it behind. The
+      # CLI auto-accepts locks older than 24 h, but clear it explicitly.
+      - name: Clear machine-scoped sync lock
+        run: rm -f data/state/sync.lock
+
+      # Fetch a fresh snapshot (skipped for monthly-only dispatches, which
+      # just re-analyze the restored state).
+      - name: Run snapshot
+        if: github.event_name != 'workflow_dispatch' || inputs.action != 'monthly'
+        run: python -m corpus_sync.cli snapshot
+
+      # Change detection needs two complete snapshots; the first run has one.
+      - name: Detect changes
+        if: github.event_name != 'workflow_dispatch' || inputs.action != 'monthly'
+        run: >-
+          python -m corpus_sync.cli detect ||
+          (echo "WARN: no previous complete snapshot; skipping detect"; exit 0)
+
+      # Upload state even on partial failure so the next run resumes from
+      # this checkpoint.
+      - name: Upload state
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-state
+          path: |
+            data/db
+            data/state
+          if-no-files-found: ignore
+
+      - name: Upload raw snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-raw
+          path: data/raw
+          if-no-files-found: ignore
+
+  monthly:
+    name: monthly compare
+    runs-on: ubuntu-latest
+    needs: sync
+    # Runs on every scheduled run and on dispatch auto/monthly; the metrics
+    # are idempotent (current UTC month by default).
+    if: github.event_name == 'schedule' || inputs.action == 'monthly' || inputs.action == 'auto'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r corpus_sync/requirements.txt
+
+      - name: Download state
+        uses: actions/download-artifact@v4
+        with:
+          name: corpus-state
+          path: data
+
+      - name: Download raw snapshots
+        uses: actions/download-artifact@v4
+        with:
+          name: corpus-raw
+          path: data
+          continue-on-error: true
+
+      - name: Compute month
+        id: month
+        run: |
+          if [ -n "${{ inputs.month }}" ]; then
+            MONTH="${{ inputs.month }}"
+          else
+            MONTH=$(date -u +%Y-%m)
+          fi
+          echo "month=$MONTH" >> "$GITHUB_OUTPUT"
+
+      - name: Analyze
+        run: python -m corpus_sync.cli analyze --month "${{ steps.month.outputs.month }}"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-report
+          path: data/out
+          if-no-files-found: ignore
+
+  publish:
+    name: publish to Hugging Face
+    runs-on: ubuntu-latest
+    needs: monthly
+    # Only runs when monthly succeeded (auto-skipped when monthly is skipped).
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r corpus_sync/requirements.txt
+
+      - name: Download state
+        uses: actions/download-artifact@v4
+        with:
+          name: corpus-state
+          path: data
+
+      - name: Download raw snapshots
+        uses: actions/download-artifact@v4
+        with:
+          name: corpus-raw
+          path: data
+          continue-on-error: true
+
+      - name: Compute month
+        id: month
+        run: |
+          if [ -n "${{ inputs.month }}" ]; then
+            MONTH="${{ inputs.month }}"
+          else
+            MONTH=$(date -u +%Y-%m)
+          fi
+          echo "month=$MONTH" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to HF
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "WARN: HF_TOKEN secret not set; skipping HF upload (dataset staged but not uploaded)."
+            exit 0
+          fi
+          python -m corpus_sync.cli publish --month "${{ steps.month.outputs.month }}"
+
+      - name: Upload staged dataset
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-hf-staged
+          path: data/out/publish
+          if-no-files-found: ignore
