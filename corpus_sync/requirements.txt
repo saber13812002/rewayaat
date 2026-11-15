@@ -1,0 +1,9 @@
+# corpus_sync pipeline — Python 3.13 (64-bit)
+# Install: python -m pip install -r corpus_sync/requirements.txt
+requests>=2.31
+pandas>=2.2
+pyarrow>=15.0
+diff-match-patch>=20230402
+huggingface_hub>=0.23
+PyYAML>=6.0
+pytest>=8.0

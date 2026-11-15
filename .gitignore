@@ -73,6 +73,9 @@ application-local.properties
 __pycache__/
 *.pyc
 
+# corpus_sync working dir (raw snapshots, sqlite, state, reports)
+/data/
+
 # Temp/session files
 /tmp
 /tmp/
