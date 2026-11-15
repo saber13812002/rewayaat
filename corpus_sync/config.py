@@ -27,3 +27,4 @@ NORM_VERSION: str = "1.0"           # rules v1.0: NFKC + strip for field hashes
 # --- Hugging Face ------------------------------------------------------------
 HF_REPO_ID: str = "saber13812002/rewayaat-corpus"
 HF_IS_PRIVATE: bool = True          # stays private until a data license is confirmed
+HF_LICENSE: str = "UNCONFIRMED - private"
