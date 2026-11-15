@@ -17,6 +17,12 @@
     "count": 6,
     "sha256": "e175531432979df804b374078ec828288f6906382426876719b27464cfe67f93"
   },
+  "hadith_alamali_1.json": {
+    "source": "https://rewayaat.info/v1/narrations/Al-Amali-Saduq:1 (by-id, narration object)",
+    "fetched_at": "2026-11-15T20:06:55Z",
+    "count": 1,
+    "sha256": "731f361891dfe96dba146d26d0c343d5fd4fb71d1aef0ce646cd54f834261598"
+  },
   "chapter_split.json": {
     "source": "local batches (batches/*.jsonl + batches/v1-restored/*.jsonl), 50,038 docs",
     "fetched_at": "2026-11-15",
