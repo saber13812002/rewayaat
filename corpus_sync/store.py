@@ -42,6 +42,10 @@ CREATE TABLE IF NOT EXISTS changes(
   changed_fields TEXT,              -- json list
   sentence_stats TEXT,              -- json {"ar":{added,removed,modified},"en":{...}}
   PRIMARY KEY (snapshot_id, source_id));
+CREATE TABLE IF NOT EXISTS sentence_totals(
+  snapshot_id TEXT NOT NULL, lang TEXT NOT NULL,  -- 'ar' | 'en'
+  total INTEGER NOT NULL,
+  PRIMARY KEY (snapshot_id, lang));
 """
 
 
