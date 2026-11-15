@@ -1,0 +1,22 @@
+{
+ "book": "Faḍaʾil al-Shīʿa",
+ "fetched_at": "2026-10-02T00:00:00Z",
+ "docs": 44,
+ "counts": {
+  "Faḍaʾil al-Shīʿa": 44
+ },
+ "sha256": "3a8e2e6c051ec002b6f92bc542715136452e632658eb6fa14496a91c82b79706",
+ "source": "local ES export batches/batch_00088.jsonl + batch_00089.jsonl (rewayaat_updated index, exported 2026-02-03)",
+ "line_shape": "{source_id, book, fetched_at, page, label, raw} — matches corpus_sync.snapshot._append_page",
+ "derived_from": "snap_A.jsonl",
+ "mutations": {
+  "removed": "Fadail-al-Shia-Saduq:45",
+  "modified": {
+   "Fadail-al-Shia-Saduq:2": "raw.english last sentence: 'the Prophet's family.' -> 'the Prophet's family truly.' (one word added)"
+  },
+  "refetched_as_is": [
+   "Fadail-al-Shia-Saduq:1",
+   "Fadail-al-Shia-Saduq:10"
+  ]
+ }
+}

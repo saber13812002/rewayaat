@@ -40,5 +40,17 @@
     "fetched_at": "2026-11-15",
     "count": 4,
     "sha256": "c39fd479882c9d481ba54e0144e863c98f872a68976951c63c9c561e507a0d2a"
+  },
+  "e2e_snapshots/snap_A.jsonl": {
+    "source": "local ES export batches/batch_00088.jsonl + batch_00089.jsonl (rewayaat_updated index, exported 2026-02-03), all 45 Faḍaʾil al-Shīʿa docs; line shape {source_id, book, fetched_at, page, label, raw} matches corpus_sync.snapshot._append_page; generator tmp/make_e2e.py",
+    "fetched_at": "2026-11-15",
+    "count": 45,
+    "sha256": "b6978033e12f55638b65b91250156644a9af6f17b8759710f89b57adcf6159f6"
+  },
+  "e2e_snapshots/snap_B.jsonl": {
+    "source": "DERIVED from e2e_snapshots/snap_A.jsonl by tmp/make_e2e.py — reproducible offline: REMOVE Fadail-al-Shia-Saduq:45; MODIFY Fadail-al-Shia-Saduq:2 raw.english ('the Prophet’s family.' -> 'the Prophet’s family truly.'); RE-FETCH-AS-IS :1 and :10 (only fetched_at differs). No network needed.",
+    "fetched_at": "2026-11-15",
+    "count": 44,
+    "sha256": "3a8e2e6c051ec002b6f92bc542715136452e632658eb6fa14496a91c82b79706"
   }
 }
