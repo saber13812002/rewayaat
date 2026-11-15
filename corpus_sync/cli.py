@@ -136,9 +136,16 @@ def _cmd_snapshot(args) -> int:
         conn = store.open_db()
         status = "complete" if not result.incomplete else "partial"
         created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        # Store raw_path relative to DATA_DIR (POSIX) so the DB state is portable:
+        # CI restores artifacts under a different absolute checkout, so an
+        # absolute or CWD-relative path would not resolve on the next machine.
+        try:
+            raw_rel = result.path.relative_to(config.DATA_DIR).as_posix()
+        except ValueError:
+            raw_rel = str(result.path)
         store.record_snapshot(
             conn, snap_id=snap_id, created_at=created_at, status=status,
-            total_docs=result.docs, raw_path=str(result.path),
+            total_docs=result.docs, raw_path=raw_rel,
             book_counts=result.books)
         n_records = _store_records(conn, snap_id, result.path)
 

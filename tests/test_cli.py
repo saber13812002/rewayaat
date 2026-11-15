@@ -131,6 +131,13 @@ def test_snapshot_subcommand(tmp_data_dir, monkeypatch):
     assert store.latest_snapshot(conn) == s["snapshot"]
     assert store.snapshot_status(conn, s["snapshot"]) == "complete"
     assert len(store.load_record_hashes(conn, s["snapshot"])) == 5
+    # raw_path must be stored relative to DATA_DIR (POSIX) so the DB state is
+    # portable across machines (CI restores artifacts under a different CWD)
+    row = conn.execute("SELECT raw_path FROM snapshots WHERE id=?",
+                       (s["snapshot"],)).fetchone()
+    raw_path = row[0]
+    assert not Path(raw_path).is_absolute()
+    assert (config.DATA_DIR / Path(raw_path)).is_file()
     # lock released after a successful run
     assert not (config.STATE_DIR / cli.LOCK_NAME).exists()
 
