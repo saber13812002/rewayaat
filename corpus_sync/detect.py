@@ -58,6 +58,15 @@ class ChangeSet:
     details: dict[str, dict] = field(default_factory=dict)
 
 
+def previous_complete(conn: sqlite3.Connection, snap_id: str) -> str | None:
+    """Newest complete snapshot strictly older than ``snap_id`` (or None)."""
+    row = conn.execute(
+        "SELECT id FROM snapshots WHERE status='complete' AND id<?"
+        " ORDER BY id DESC LIMIT 1", (snap_id,)
+    ).fetchone()
+    return row[0] if row else None
+
+
 def load_raw_index(raw_path: Path) -> dict[str, dict]:
     """source_id -> raw doc, one lazy line scan of a snapshot raw JSONL."""
     out: dict[str, dict] = {}

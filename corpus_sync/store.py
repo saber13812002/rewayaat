@@ -89,6 +89,15 @@ def latest_snapshot(conn: sqlite3.Connection, *, complete_only: bool = True) -> 
     return row[0] if row else None
 
 
+def latest_snapshot_before(conn: sqlite3.Connection, snap_id: str) -> str | None:
+    """Newest complete snapshot strictly older than ``snap_id`` (or None)."""
+    row = conn.execute(
+        "SELECT id FROM snapshots WHERE status='complete' AND id<?"
+        " ORDER BY id DESC LIMIT 1", (snap_id,)
+    ).fetchone()
+    return row[0] if row else None
+
+
 def insert_records(conn: sqlite3.Connection, snap_id: str, rows: Iterable[dict]) -> None:
     conn.executemany(
         "INSERT OR REPLACE INTO records(snapshot_id, source_id, book, chapter,"
