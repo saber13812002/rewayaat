@@ -193,7 +193,10 @@ def _cmd_snapshot(args) -> int:
         summary["records_stored"] = records_note
         summary["database"] = str(config.DB_PATH)
         summary["scoped_books"] = books
-        _write_json(config.OUT_DIR / f"snapshot-{result.path.stem}.summary.json",
+        # The raw file stem already starts with "snapshot-", so copying it
+        # verbatim yields a clean "snapshot-<id>.summary.json" (the tests
+        # glob snapshot-*.summary.json).
+        _write_json(config.OUT_DIR / f"{result.path.stem}.summary.json",
                     summary)
         _write_json(run_log, {
             "started_at": created_at,
