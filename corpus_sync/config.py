@@ -23,6 +23,12 @@ RAW_DIR: Path = DATA_DIR / "raw"
 STATE_DIR: Path = DATA_DIR / "state"
 OUT_DIR: Path = DATA_DIR / "out"
 
+# --- Chapter split fixture ----------------------------------------------------
+# Committed fixture with per-chapter lists + number seed sets for the books
+# whose live count reaches LOOKUP's 10,000 max_result_window. Refresh it from
+# a complete snapshot run when the corpus changes (see the fixture header).
+SPLIT_FIXTURE: Path = Path("tests/fixtures/chapter_split.json")
+
 # --- Normalization -----------------------------------------------------------
 NORM_VERSION: str = "1.0"           # rules v1.0: NFKC + strip for field hashes
 

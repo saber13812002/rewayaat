@@ -20,9 +20,17 @@ Strategy (locked by live smoke, see tests/fixtures/smoke_range_note.md):
   from the split fixture union numbers seen in the file, descending, with
   early stop once the book reaches its live count.
 
+Failure isolation: a query (or page) that still fails after all retries is
+recorded in state["failed"] and the run CONTINUES with the remaining queries;
+the failed book is reported incomplete in the summary and re-attempted on the
+next ``--resume``. One broken book therefore never stops the others.
+
 Resumability: after every page, STATE_DIR/snapshot_state.json is rewritten
-atomically with the completed (label, page) pairs and per-label totals. A run
-with an existing dest resumes from that state and skips completed pages.
+atomically with the completed (label, page) pairs, per-label totals, the
+failed-query list, and a last_activity timestamp. A run with an existing dest
+resumes from that state and skips completed pages. Every page also appends one
+parseable progress line to STATE_DIR/snapshot_progress.log (consumed by the
+monitoring tools).
 
 The state file's sha256 field carries the hash of the last finalized file
 (recomputed at finalize; per-page hashing of a growing 50MB file was dropped
@@ -34,6 +42,7 @@ from __future__ import annotations
 import hashlib
 import itertools
 import json
+import logging
 import os
 import re
 import time
@@ -42,6 +51,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import config, http
+
+logger = logging.getLogger("corpus_sync.snapshot")
+if not logger.handlers:
+    _h = logging.StreamHandler()
+    _h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    logger.addHandler(_h)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 # LOOKUP max_result_window: totals clamp here; from >= this returns size=0.
 MAX_PAGE_SIZE: int = 10000
@@ -85,6 +102,7 @@ class SnapshotResult:
     books: dict[str, int]    # per-book unique doc counts
     incomplete: list[str]    # book names not matching live counts
     duration_s: float
+    failed: list[str] = field(default_factory=list)  # labels that failed after all retries
 
 
 def _lookup_with_retry(fetcher, query: str, page: int, per_page: int):
@@ -187,7 +205,34 @@ def _load_state(state_path: Path, dest_name: str) -> dict | None:
     state.setdefault("totals", {})
     state.setdefault("repair_tried", {})
     state.setdefault("sha256", "")
+    state.setdefault("failed", [])
+    state.setdefault("failed_pages", {})
+    state.setdefault("last_activity", "")
     return state
+
+
+PROGRESS_LOG = "snapshot_progress.log"
+
+
+def _progress_line(state_path: Path, level: str, msg: str) -> None:
+    """Append one machine-parseable progress line + log to stdout.
+
+    Format: <iso-utc> <LEVEL> <msg>   (consumed by monitor/ and systemd journal)
+    """
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    line = f"{ts} {level} {msg}"
+    if level == "ERROR":
+        logger.error(line)
+    else:
+        logger.info(line)
+    try:
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(state_path.parent / PROGRESS_LOG, "a", encoding="utf-8") as fh:
+            fh.write(line + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+    except OSError:
+        pass
 
 
 def _save_state(state_path: Path, state: dict) -> None:
@@ -240,6 +285,59 @@ def verify_completeness(book_counts: dict[str, int], live_books: list) -> list[s
     return bad
 
 
+def _touch(state_path: Path, state: dict) -> None:
+    """Record wall-clock last activity, then persist state atomically."""
+    state["last_activity"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _save_state(state_path, state)
+
+
+def _fail(state_path: Path, state: dict, label: str, book: str, exc: Exception) -> None:
+    """Record a query that exhausted all retries; the run continues on others."""
+    if label not in state["failed"]:
+        state["failed"].append(label)
+    _touch(state_path, state)
+    _progress_line(state_path, "ERROR",
+                   f"FAILED book={book} label={label} "
+                   f"error={type(exc).__name__}: {exc} (retried next --resume)")
+
+
+def _retry_pages(fetcher, state_path: Path, state: dict, dest: Path, q: Query,
+                 clock, per_page: int) -> None:
+    """Fetch every uncompleted page of one query; record failures, no raise."""
+    done = set(state["completed"].get(q.label, []))
+    total = state["totals"].get(q.label)
+    first_docs = None
+    if total is None:
+        try:
+            first = _lookup_with_retry(fetcher, query_for(q), 1, per_page)
+        except (http.HttpError, http.HttpStatusError) as exc:
+            _fail(state_path, state, q.label, q.book, exc)
+            return
+        total = first.total
+        first_docs = first.collection
+        state["totals"][q.label] = total
+        _touch(state_path, state)
+    pages = (total + per_page - 1) // per_page if total else 0
+    for page in range(1, pages + 1):
+        if page in done:
+            continue
+        try:
+            if page == 1 and first_docs is not None:
+                res = LookupResult(total=total, collection=first_docs)
+            else:
+                res = _lookup_with_retry(fetcher, query_for(q), page, per_page)
+        except (http.HttpError, http.HttpStatusError) as exc:
+            _fail(state_path, state, q.label, q.book, exc)
+            continue
+        _append_page(dest, res.collection, q.book, clock(), page, q.label)
+        done.add(page)
+        state["completed"][q.label] = sorted(done)
+        _touch(state_path, state)
+        _progress_line(state_path, "PAGE",
+                       f"label={q.label} page={page}/{pages} "
+                       f"docs={len(res.collection)}")
+
+
 def run_snapshot(
     *,
     dest: Path | None = None,
@@ -248,6 +346,7 @@ def run_snapshot(
     per_page: int = config.PER_PAGE,
     strict: bool = False,
     split: dict | None = None,
+    books: list[str] | None = None,
 ) -> SnapshotResult:
     """Fetch the full corpus into one JSONL snapshot.
 
@@ -255,6 +354,19 @@ def run_snapshot(
     (corpus_sync.fetch satisfies this). `dest` selects the snapshot file;
     None -> a fresh timestamped file under RAW_DIR. An existing dest with a
     matching state file resumes (completed pages are skipped).
+
+    `split` is the chapter_split fixture: books with live count >= MAX_PAGE_SIZE
+    must be passed as chapter queries (LOOKUP clamps at 10,000) — the CLI loads
+    tests/fixtures/chapter_split.json automatically.
+
+    `books` optionally restricts the run to a subset of book names (small-book
+    smoke tests, single-book re-runs); completeness is then verified only for
+    the subset.
+
+    Failure isolation: a query that still fails after HTTP + page retries is
+    recorded in state["failed"] and the run CONTINUES with the remaining
+    queries; the affected book is reported incomplete and its failed pages are
+    re-attempted on the next ``--resume``.
     """
     started = time.monotonic()
     from . import fetch as fetch_module
@@ -270,35 +382,36 @@ def run_snapshot(
     state = _load_state(state_path, dest.name)
     is_resume = state is not None
     if not is_resume:
-        state = {"snapshot": dest.name, "completed": {}, "totals": {}, "repair_tried": {}, "sha256": ""}
+        state = {"snapshot": dest.name, "completed": {}, "totals": {},
+                 "repair_tried": {}, "sha256": "", "failed": [],
+                 "last_activity": ""}
         _save_state(state_path, state)
 
-    live = {b.name: b for b in fetcher.books()}
+    live_all = {b.name: b for b in fetcher.books()}
+    if books is not None:
+        unknown = sorted(set(books) - set(live_all))
+        if unknown:
+            raise ValueError(f"books not in live catalog: {', '.join(unknown)}")
+        wanted = set(books)
+        live = {n: b for n, b in live_all.items() if n in wanted}
+    else:
+        live = live_all
+        if not live:
+            raise ValueError("no books to fetch (live catalog empty?)")
+    
     queries = plan_queries(list(live.values()), split)
-
+    # Failed labels from the PREVIOUS run are re-attempted now: each query is
+    # visited exactly once per run, and lookups are idempotent (dedupe at
+    # finalize), so retrying a failed page can never duplicate data.
+    state["failed"] = []
+    _save_state(state_path, state)
+    _progress_line(state_path, "START",
+                   f"dest={dest.name} books={len(live)} queries={len(queries)} "
+                   f"resume={is_resume}")
+    
     # --- planned passes (book / chapter queries) --------------------------
     for q in queries:
-        done = set(state["completed"].get(q.label, []))
-        total = state["totals"].get(q.label)
-        first_docs = None
-        if total is None:
-            first = _lookup_with_retry(fetcher, query_for(q), 1, per_page)
-            total = first.total
-            first_docs = first.collection
-            state["totals"][q.label] = total
-            _save_state(state_path, state)
-        pages = (total + per_page - 1) // per_page if total else 0
-        for page in range(1, pages + 1):
-            if page in done:
-                continue
-            if page == 1 and first_docs is not None:
-                res = LookupResult(total=total, collection=first_docs)
-            else:
-                res = _lookup_with_retry(fetcher, query_for(q), page, per_page)
-            _append_page(dest, res.collection, q.book, clock(), page, q.label)
-            done.add(page)
-            state["completed"][q.label] = sorted(done)
-            _save_state(state_path, state)
+        _retry_pages(fetcher, state_path, state, dest, q, clock, per_page)
 
     # --- dedupe + book counts ---------------------------------------------
     lines = _dedupe(_read_lines(dest))
@@ -307,6 +420,7 @@ def run_snapshot(
         book_counts[l["book"]] = book_counts.get(l["book"], 0) + 1
 
     # --- repair pass: number-term scan for split books with shortfalls ----
+    # Each number query is isolated: one bad number never stops the scan.
     split_books = (split or {}).get("books", {})
     for name, live_b in live.items():
         if live_b.count < MAX_PAGE_SIZE:
@@ -330,17 +444,23 @@ def run_snapshot(
             if n in tried or n == "":
                 continue
             tried.add(n)
-            rq = Query(book=name, chapter=None, label=f"book:{name} number:{n}", expected_count=0, kind="number", number=n)
-            first = _lookup_with_retry(fetcher, query_for(rq), 1, per_page)
-            count += _count_new(first.collection, seen_ids)
-            _append_page(dest, first.collection, name, clock(), 1, rq.label)
-            pages = (first.total + per_page - 1) // per_page if first.total else 0
-            for page in range(2, pages + 1):
-                res = _lookup_with_retry(fetcher, query_for(rq), page, per_page)
-                count += _count_new(res.collection, seen_ids)
-                _append_page(dest, res.collection, name, clock(), page, rq.label)
+            rq = Query(book=name, chapter=None, label=f"book:{name} number:{n}",
+                       expected_count=0, kind="number", number=n)
+            try:
+                first = _lookup_with_retry(fetcher, query_for(rq), 1, per_page)
+                count += _count_new(first.collection, seen_ids)
+                _append_page(dest, first.collection, name, clock(), 1, rq.label)
+                pages = (first.total + per_page - 1) // per_page if first.total else 0
+                for page in range(2, pages + 1):
+                    res = _lookup_with_retry(fetcher, query_for(rq), page, per_page)
+                    count += _count_new(res.collection, seen_ids)
+                    _append_page(dest, res.collection, name, clock(), page, rq.label)
+            except (http.HttpError, http.HttpStatusError) as exc:
+                _progress_line(state_path, "WARN",
+                               f"repair number query failed book={name} "
+                               f"number={n} error={type(exc).__name__}: {exc}")
             state["repair_tried"][name] = sorted(tried)
-            _save_state(state_path, state)
+            _touch(state_path, state)
 
     # --- finalize: dedupe rewrite + completeness ---------------------------
     lines = _dedupe(_read_lines(dest))
@@ -352,7 +472,7 @@ def run_snapshot(
     )
     sha = _sha256(dest)
     state["sha256"] = sha
-    _save_state(state_path, state)
+    _touch(state_path, state)
 
     incomplete = verify_completeness(book_counts, list(live.values()))
     summary = {
@@ -360,15 +480,21 @@ def run_snapshot(
         "docs": len(lines),
         "books": book_counts,
         "incomplete": incomplete,
+        "failed": sorted(state["failed"]),
         "sha256": sha,
         "fetched_at": clock(),
         "duration_s": round(time.monotonic() - started, 2),
     }
     _atomic_write(dest.with_suffix(".summary.json"), json.dumps(summary, ensure_ascii=False, indent=1))
+    _progress_line(state_path, "DONE",
+                   f"dest={dest.name} docs={len(lines)} "
+                   f"incomplete={incomplete or '[]'} failed={len(state['failed'])}")
 
     if incomplete and strict:
         raise IncompleteSnapshotError(incomplete)
-    return SnapshotResult(path=dest, docs=len(lines), books=book_counts, incomplete=incomplete, duration_s=round(time.monotonic() - started, 3))
+    return SnapshotResult(path=dest, docs=len(lines), books=book_counts,
+                          incomplete=incomplete, duration_s=round(time.monotonic() - started, 3),
+                          failed=sorted(state["failed"]))
 
 
 def _append_page(path: Path, docs: list[dict], book: str, fetched_at: str, page: int, label: str) -> None:

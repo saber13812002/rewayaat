@@ -85,8 +85,11 @@ def _big_data():
     }
 
 
-def _small_data(n=300):
-    return {"chapters": {"Ch": [_doc("s-%d" % i, i) for i in range(1, n + 1)]}, "extra": []}
+def _small_data(n=300, prefix="s"):
+    # Distinct `prefix` per book: source_ids are globally unique in the live API,
+    # and finalize dedupes by source_id (keep-last) — colliding ids would make
+    # one book's docs overwrite another's on resume.
+    return {"chapters": {"Ch": [_doc(f"{prefix}-{i}", i) for i in range(1, n + 1)]}, "extra": []}
 
 
 def _big_split(numbers):
@@ -309,22 +312,124 @@ class _FlakyFetcher:
         return self.inner.lookup(q, page, per_page)
 
 
+class _BookFailFetcher:
+    """FakeFetcher that fails every lookup for one specific book."""
+
+    def __init__(self, book_data, fail_book):
+        self.inner = FakeFetcher(book_data)
+        self.fail_book = fail_book
+        self.calls = []
+
+    def books(self):
+        return self.inner.books()
+
+    def lookup(self, q, page, per_page=PER_PAGE):
+        self.calls.append(q)
+        if f'book:"{self.fail_book}"' in q:
+            raise http_mod.HttpError("https://rewayaat.info/v1/narrations", 1)
+        return self.inner.lookup(q, page, per_page)
+
+
 def test_page_http_error_retried_and_recovers(tmp_data_dir, monkeypatch):
     # One transient read-timeout on the first page must not kill the run.
     monkeypatch.setattr(time, "sleep", lambda s: None)
     fetcher = _FlakyFetcher(FakeFetcher({"Small": _small_data(300)}), fail_first=1)
     res = snapshot.run_snapshot(dest=None, fetcher=fetcher, clock=lambda: "T1", per_page=PER_PAGE)
     assert res.incomplete == []
+    assert res.failed == []
     lines = [json.loads(x) for x in res.path.read_text(encoding="utf-8").splitlines() if x.strip()]
     assert len(lines) == 300
     # 30 pages + 1 extra call for the retried first page
     assert fetcher.n == 31
 
 
-def test_page_http_error_exhausts_and_raises(tmp_data_dir, monkeypatch):
-    # Persistent failure: page-level retries are exhausted, HttpError propagates.
+def test_failed_query_is_isolated_run_continues(tmp_data_dir, monkeypatch):
+    # A book whose first page exhausts ALL retries must not kill the run:
+    # it is recorded as failed + incomplete while the other book completes.
     monkeypatch.setattr(time, "sleep", lambda s: None)
-    fetcher = _FlakyFetcher(FakeFetcher({"Small": _small_data(300)}), fail_first=99)
-    with pytest.raises(http_mod.HttpError):
-        snapshot.run_snapshot(dest=None, fetcher=fetcher, clock=lambda: "T1", per_page=PER_PAGE)
-    assert fetcher.n == config.SNAPSHOT_PAGE_RETRIES
+    fetcher = _BookFailFetcher(
+        {"Small": _small_data(300), "Broken": _small_data(200, prefix="br")}, "Broken")
+    res = snapshot.run_snapshot(dest=None, fetcher=fetcher, clock=lambda: "T1", per_page=PER_PAGE)
+    assert res.incomplete == ["Broken"]
+    assert res.books == {"Small": 300}
+    assert res.failed == ["book:Broken"]
+    lines = [json.loads(x) for x in res.path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    assert {l["book"] for l in lines} == {"Small"}
+    assert len(lines) == 300
+    # the failed label is persisted in state for the next --resume
+    state = json.loads(
+        (config.STATE_DIR / snapshot.STATE_FILE).read_text(encoding="utf-8"))
+    assert state["failed"] == ["book:Broken"]
+
+
+def test_failed_query_retried_on_resume(tmp_data_dir, monkeypatch):
+    # The failed query is re-attempted on resume; if the failure was
+    # transient the book completes and `failed` is cleared.
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    fail_first = {"v": True}
+
+    class _TransientFetcher(_BookFailFetcher):
+        def lookup(self, q, page, per_page=PER_PAGE):
+            if fail_first["v"] and f'book:"Broken"' in q:
+                raise http_mod.HttpError("u", 1)
+            return self.inner.lookup(q, page, per_page)
+
+    f1 = _TransientFetcher(
+        {"Small": _small_data(300), "Broken": _small_data(200, prefix="br")}, "Broken")
+    res1 = snapshot.run_snapshot(dest=None, fetcher=f1, clock=lambda: "T1", per_page=PER_PAGE)
+    assert res1.failed == ["book:Broken"]
+    dest = res1.path
+
+    fail_first["v"] = False  # API recovered
+    f2 = _TransientFetcher(
+        {"Small": _small_data(300), "Broken": _small_data(200, prefix="br")}, "Broken")
+    res2 = snapshot.run_snapshot(dest=dest, fetcher=f2, clock=lambda: "T2", per_page=PER_PAGE)
+    assert res2.incomplete == []
+    assert res2.failed == []
+    assert res2.books == {"Small": 300, "Broken": 200}
+    assert res2.docs == 500
+    state = json.loads(
+        (config.STATE_DIR / snapshot.STATE_FILE).read_text(encoding="utf-8"))
+    assert state["failed"] == []
+
+
+def test_failed_page_of_multi_page_query_isolated(tmp_data_dir, monkeypatch):
+    # Page 2 of a 30-page query (per_page=10) fails permanently; the remaining
+    # pages still fetch, the failed page is recorded, and the run finishes
+    # (book stays short).
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+
+    class _Page2Fail(FakeFetcher):
+        def lookup(self, q, page, per_page=PER_PAGE):
+            if page == 2:
+                raise http_mod.HttpError("https://rewayaat.info/v1/narrations", 1)
+            return super().lookup(q, page, per_page)
+
+    fetcher = _Page2Fail({"Small": _small_data(300)})
+    res = snapshot.run_snapshot(dest=None, fetcher=fetcher, clock=lambda: "T1", per_page=PER_PAGE)
+    assert res.incomplete == ["Small"]
+    assert res.failed == ["book:Small"]
+    lines = [json.loads(x) for x in res.path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    # 300 live docs; all pages landed except page 2 (10 docs missing)
+    assert len(lines) == 290
+    state = json.loads(
+        (config.STATE_DIR / snapshot.STATE_FILE).read_text(encoding="utf-8"))
+    assert state["completed"]["book:Small"] == [p for p in range(1, 31) if p != 2]
+    # failed is cleared at run start and re-recorded when the failure recurs
+    assert state["failed"] == ["book:Small"]
+
+
+def test_failed_query_retried_when_api_recovers_on_resume(tmp_data_dir, monkeypatch):
+    # Cover the resume path explicitly: after a failed run, resume re-attempts
+    # the failed query (not skipped) and completes the book.
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    f1 = _BookFailFetcher(
+        {"Small": _small_data(300), "Broken": _small_data(200, prefix="br")}, "Broken")
+    res1 = snapshot.run_snapshot(dest=None, fetcher=f1, clock=lambda: "T1", per_page=PER_PAGE)
+    assert res1.failed == ["book:Broken"]
+    # resume: fetcher no longer fails; the previously-failed query must run.
+    f2 = FakeFetcher({"Small": _small_data(300), "Broken": _small_data(200, prefix="br")})
+    res2 = snapshot.run_snapshot(dest=res1.path, fetcher=f2, clock=lambda: "T2", per_page=PER_PAGE)
+    assert res2.incomplete == []
+    assert res2.failed == []
+    assert res2.books == {"Small": 300, "Broken": 200}

@@ -167,6 +167,95 @@ def test_snapshot_allows_stale_lock(tmp_data_dir, monkeypatch):
     assert rc == 0
 
 
+class _MultiFetch:
+    """books()/lookup() fake with per-book doc sets and query logging."""
+
+    def __init__(self, book_docs):
+        self.book_docs = book_docs  # {name: [doc, ...]}
+        self.calls = []
+
+    def books(self):
+        return [Book(name=n, name_ar=n, slug=n.lower(), count=len(d))
+                for n, d in self.book_docs.items()]
+
+    def lookup(self, q, page, per_page=config.PER_PAGE):
+        self.calls.append(q)
+        m = re.search(r'book:"([^"]*)"', q)
+        docs = self.book_docs.get(m.group(1), [])
+        start = (page - 1) * per_page
+        return snapshot.LookupResult(
+            total=len(docs), collection=docs[start:start + per_page])
+
+
+def _install_multi(monkeypatch, book_docs):
+    fake = _MultiFetch(book_docs)
+    monkeypatch.setattr(fetch_mod, "books", fake.books)
+    monkeypatch.setattr(fetch_mod, "lookup", fake.lookup)
+    return fake
+
+
+def test_snapshot_books_scoped_run_not_stored(tmp_data_dir, monkeypatch):
+    # --books "One" fetches only One; the DB stays empty (scoped runs are
+    # test artifacts, not corpus snapshots), the summary is written.
+    fake = _install_multi(monkeypatch, {
+        "One": _mini_docs(3, book="One"),
+        "Two": _mini_docs(4, book="Two"),
+    })
+    rc = cli.main(["snapshot", "--books", "One"])
+    assert rc == 0
+    assert fake.calls == ['book:"One"']
+    summaries = list(config.OUT_DIR.glob("snapshot-*.summary.json"))
+    assert len(summaries) == 1
+    s = json.loads(summaries[0].read_text(encoding="utf-8"))
+    assert s["books"] == {"One": 3}
+    assert s["incomplete"] == []
+    assert s["scoped_books"] == ["One"]
+    conn = store.open_db()
+    assert store.latest_snapshot(conn, complete_only=False) is None
+
+
+def test_snapshot_books_unknown_name_fails(tmp_data_dir, monkeypatch):
+    _install_multi(monkeypatch, {"One": _mini_docs(3, book="One")})
+    rc = cli.main(["snapshot", "--books", "One,Nope"])
+    assert rc == 1
+    assert list((config.DATA_DIR / "raw").glob("*.jsonl")) == []
+
+
+def test_snapshot_cli_uses_chapter_split_fixture(tmp_data_dir, monkeypatch):
+    # A live book >= 10000 docs must be fetched via chapter queries when the
+    # committed fixture covers it (the Al-Kafi/Ghurar 10k-clamp fix).
+    fixture = tmp_path_fixture(tmp_data_dir)
+    monkeypatch.setattr(config, "SPLIT_FIXTURE", fixture)
+    big = _mini_docs(1, book="Big")  # content irrelevant; count drives the plan
+    fake = _install_multi(monkeypatch, {
+        "Big": big, "Small": _mini_docs(2, book="Small"),
+    })
+    monkeypatch.setattr(
+        fetch_mod, "books",
+        lambda: [Book("Big", "Big", "big", 14242),
+                 Book("Small", "Small", "small", 2)])
+    rc = cli.main(["snapshot"])
+    assert rc == 0
+    assert any(c.startswith('book:"Big" chapter:') for c in fake.calls)
+    assert not any(c == 'book:"Big"' for c in fake.calls)
+    assert 'book:"Small"' in fake.calls
+
+
+def tmp_path_fixture(tmp_data_dir):
+    fixture = tmp_data_dir.parent / "chapter_split.json"
+    fixture.write_text(json.dumps({
+        "books": {
+            "Big": {
+                "chapters": [
+                    {"name": "One", "local_count": 1, "quote": False},
+                ],
+                "numbers": ["1"],
+            }
+        }
+    }), encoding="utf-8")
+    return fixture
+
+
 # --- detect -----------------------------------------------------------------
 
 

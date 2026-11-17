@@ -100,6 +100,25 @@ def _release_lock(lock: Path | None) -> None:
 # --- subcommands --------------------------------------------------------------
 
 
+def _load_split() -> dict | None:
+    """Load the committed chapter-split fixture (None if absent/corrupt).
+
+    The fixture drives chapter-level queries for the books whose live count
+    reaches LOOKUP's 10,000 max_result_window; without it those books are
+    silently clamped at 10,000 docs (the Al-Kafi/Ghurar degradation).
+    """
+    if not config.SPLIT_FIXTURE.is_file():
+        print(f"WARN: chapter split fixture missing ({config.SPLIT_FIXTURE}); "
+              "books >= 10000 docs will be clamped at 10000.")
+        return None
+    try:
+        return json.loads(config.SPLIT_FIXTURE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        print(f"WARN: chapter split fixture unreadable ({exc}); books "
+              ">= 10000 docs will be clamped at 10000.")
+        return None
+
+
 def _cmd_snapshot(args) -> int:
     lock = _acquire_lock()
     if lock is None:
@@ -107,6 +126,8 @@ def _cmd_snapshot(args) -> int:
               "another sync may be running.")
         return 1
     try:
+        config.OUT_DIR.mkdir(parents=True, exist_ok=True)
+        run_log = config.OUT_DIR / "last_run.log"
         dest = None
         if getattr(args, "resume", False):
             state_path = config.STATE_DIR / snapshot.STATE_FILE
@@ -130,10 +151,17 @@ def _cmd_snapshot(args) -> int:
                 # No page had landed before the crash: safe to recreate the file.
                 print(f"note: --resume snapshot file missing, none fetched; "
                       f"creating {dest.name} fresh.")
-        result = snapshot.run_snapshot(dest=dest, strict=args.strict)
-        snap_id = result.path.stem  # snapshot-YYYYMMDD-HHMMSS-<seq>
-        snap_id = "-".join(snap_id.split("-")[1:])  # YYYYMMDD-HHMMSS-<seq>
-        conn = store.open_db()
+        if getattr(args, "books", None):
+            book_list = [b.strip() for b in args.books.split(",") if b.strip()]
+            if not book_list:
+                print("ERROR: --books given but empty.")
+                return 1
+            # Scoped runs must not pollute the full-corpus summary baseline.
+            books = book_list
+        else:
+            books = None
+        result = snapshot.run_snapshot(dest=dest, strict=args.strict,
+                                       split=_load_split(), books=books)
         status = "complete" if not result.incomplete else "partial"
         created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         # Store raw_path relative to DATA_DIR (POSIX) so the DB state is portable:
@@ -143,22 +171,42 @@ def _cmd_snapshot(args) -> int:
             raw_rel = result.path.relative_to(config.DATA_DIR).as_posix()
         except ValueError:
             raw_rel = str(result.path)
-        store.record_snapshot(
-            conn, snap_id=snap_id, created_at=created_at, status=status,
-            total_docs=result.docs, raw_path=raw_rel,
-            book_counts=result.books)
-        n_records = _store_records(conn, snap_id, result.path)
+        # Scoped runs are test artifacts: do NOT record them in the store, or
+        # they would masquerade as a complete corpus snapshot and break the
+        # delete-only-on-verified-baseline rule for detect/publish.
+        records_note = "n/a (scoped run, not stored)"
+        snap_id = "-".join(result.path.stem.split("-")[1:])  # YYYYMMDD-HHMMSS-<seq>
+        if books is None:
+            conn = store.open_db()
+            store.record_snapshot(
+                conn, snap_id=snap_id, created_at=created_at, status=status,
+                total_docs=result.docs, raw_path=raw_rel,
+                book_counts=result.books)
+            n_records = _store_records(conn, snap_id, result.path)
+            records_note = str(n_records)
+            conn.close()
 
         summary_path = result.path.with_suffix(".summary.json")
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
         summary["snapshot"] = snap_id
         summary["status"] = status
-        summary["records_stored"] = n_records
+        summary["records_stored"] = records_note
         summary["database"] = str(config.DB_PATH)
+        summary["scoped_books"] = books
         _write_json(config.OUT_DIR / f"snapshot-{result.path.stem}.summary.json",
                     summary)
+        _write_json(run_log, {
+            "started_at": created_at,
+            "scope": books or "full",
+            "status": status,
+            "snapshot": snap_id,
+            "docs": result.docs,
+            "incomplete": result.incomplete,
+            "failed": result.failed,
+        })
         print(f"snapshot {snap_id}: docs={result.docs} status={status} "
-              f"records={n_records} incomplete={result.incomplete or '[]'} "
+              f"records={records_note} incomplete={result.incomplete or '[]'} "
+              f"failed={result.failed or '[]'} "
               f"duration_s={result.duration_s} sha256={summary['sha256']}")
         return 0
     finally:
@@ -271,6 +319,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--resume", action="store_true",
                     help="continue the in-progress snapshot named by "
                          "DATA_DIR/state/snapshot_state.json")
+    sp.add_argument("--books", metavar="A,B,C",
+                    help="only fetch these books (exact /v1/browse/books "
+                         "names, comma-separated); scoped runs are NOT stored "
+                         "in the DB (smoke tests / single-book re-runs)")
     sp.set_defaults(func=_cmd_snapshot)
 
     dp = sub.add_parser("detect", help="diff the latest two complete snapshots")
@@ -296,7 +348,8 @@ def main(argv: list[str] | None = None) -> int:
         return args.func(args)
     except (snapshot.IncompleteSnapshotError,
             detect.IncompleteSnapshotError,
-            publish.PublishError, http.HttpError, OSError) as exc:
+            publish.PublishError, http.HttpError, OSError,
+            ValueError) as exc:
         print(f"ERROR: {exc}")
         return 1
 
