@@ -1,0 +1,15 @@
+# Rewayaat corpus-sync: resume-aware full snapshot (user-level unit).
+# Installed to ~/.config/systemd/user/sync.service by deploy/install-server.sh.
+[Unit]
+Description=Rewayaat corpus-sync snapshot (resume-aware, one shot)
+Documentation=file:///etc/systemd/system/README-corpus-sync
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/rewayaat
+Environment=REWAYAAT_ROOT=%h/rewayaat
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONUTF8=1
+# A full corpus run takes hours; never let the default start timeout kill it.
+TimeoutStartSec=0
+ExecStart=/usr/bin/bash %h/rewayaat/deploy/sync_once.sh

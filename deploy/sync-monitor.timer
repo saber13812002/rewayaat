@@ -1,0 +1,12 @@
+# Hourly monitoring report (mission requirement).
+[Unit]
+Description=Hourly Rewayaat corpus-sync monitor report
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=120
+Unit=sync-monitor.service
+
+[Install]
+WantedBy=timers.target

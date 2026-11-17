@@ -1,0 +1,14 @@
+# Drives sync.service every 6 hours (fixed wall-clock times).
+# Persistent=true: if the server was down at a scheduled tick, the run
+# catches up once on the next user-manager start.
+[Unit]
+Description=Run the Rewayaat corpus-sync snapshot every 6 hours
+
+[Timer]
+OnCalendar=*-*-* *:00/6
+Persistent=true
+RandomizedDelaySec=300
+Unit=sync.service
+
+[Install]
+WantedBy=timers.target

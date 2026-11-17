@@ -1,0 +1,12 @@
+# Rewayaat corpus-sync hourly monitor (user-level unit).
+# Writes monitoring/hourly/<ts>.{txt,json} and prints the report to the
+# journal. Read-only toward the pipeline.
+[Unit]
+Description=Rewayaat corpus-sync hourly monitor
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/rewayaat
+Environment=REWAYAAT_ROOT=%h/rewayaat
+Environment=PYTHONUTF8=1
+ExecStart=%h/rewayaat/.venv/bin/python monitor/linux_monitor.py hourly
