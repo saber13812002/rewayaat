@@ -167,6 +167,34 @@ def test_snapshot_allows_stale_lock(tmp_data_dir, monkeypatch):
     assert rc == 0
 
 
+def test_snapshot_steals_lock_of_dead_holder(tmp_data_dir, monkeypatch):
+    """A fresh lock whose recorded holder pid is dead (kill -9 / OOM /
+    power loss) must NOT block the next run for 24 h (recovery-guide:
+    a crashed run must not wedge the timer)."""
+    config.STATE_DIR.mkdir(parents=True, exist_ok=True)
+    lock = config.STATE_DIR / cli.LOCK_NAME
+    lock.write_text(json.dumps({"pid": 4194000,
+                                "started_at": "2026-01-01T00:00:00+00:00"}),
+                    encoding="utf-8")
+    # Fresh mtime (default) + dead holder -> lock must be removed.
+    monkeypatch.setattr(cli, "_pid_alive", lambda pid: False)
+    _install_fetch(monkeypatch, _mini_docs(3))
+    rc = cli.main(["snapshot"])
+    assert rc == 0
+
+
+def test_snapshot_fresh_lock_live_holder_blocks(tmp_data_dir, monkeypatch):
+    """A fresh lock held by a live pid (or an unknown holder) blocks."""
+    config.STATE_DIR.mkdir(parents=True, exist_ok=True)
+    lock = config.STATE_DIR / cli.LOCK_NAME
+    lock.write_text(json.dumps({"pid": os.getpid(),
+                                "started_at": "2026-01-01T00:00:00+00:00"}),
+                    encoding="utf-8")
+    rc = cli.main(["snapshot"])
+    assert rc == 1
+    assert list((tmp_data_dir / "raw").glob("*.jsonl")) == []
+
+
 class _MultiFetch:
     """books()/lookup() fake with per-book doc sets and query logging."""
 

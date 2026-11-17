@@ -19,14 +19,17 @@ files under ``DATA_DIR/out/``):
   against the live ``/v1/browse/books`` catalog.
 
 Concurrent-run guard: a single lock file ``DATA_DIR/state/sync.lock``.
-If it exists and was modified less than 24 h ago the command refuses to
-start (no concurrent syncs); stale locks are removed and the command
-proceeds.
+The lock stores the holder's pid. A fresh lock (<24 h old) held by a
+*live* process blocks the command (no concurrent syncs); a lock left
+behind by a dead holder (kill -9, OOM, power loss) or an old lock is
+removed and the command proceeds, so a crash can never block the next
+timer tick for 24 h.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -73,17 +76,43 @@ def _store_records(conn, snap_id: str, raw_path: Path) -> int:
     return len(rows)
 
 
+def _pid_alive(pid: int) -> bool:
+    """Best-effort process liveness check.
+
+    POSIX: os.kill(pid, 0). Other platforms: assume alive (safe default —
+    the lock then expires by age alone).
+    """
+    if os.name != "posix":
+        return True
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True      # exists, owned by another user
+    except OSError:
+        return True      # unknown failure: refuse to steal the lock
+    return True
+
+
 def _acquire_lock() -> Path | None:
-    """Return the lock path, or None if a fresh lock already exists."""
+    """Return the lock path, or None if a live sync already holds it."""
     lock = config.STATE_DIR / LOCK_NAME
     config.STATE_DIR.mkdir(parents=True, exist_ok=True)
     if lock.exists():
         age = time.time() - lock.stat().st_mtime
         if age < _LOCK_MAX_AGE_S:
-            return None
+            # Fresh lock: only steal it if its recorded holder is dead.
+            # Unreadable/unknown holders are treated as live (safe).
+            try:
+                holder = int(json.loads(lock.read_text(encoding="utf-8")).get("pid"))
+            except (json.JSONDecodeError, OSError, TypeError, ValueError):
+                holder = None
+            if holder is None or _pid_alive(holder):
+                return None
         lock.unlink()
     lock.write_text(
-        json.dumps({"pid": None, "started_at":
+        json.dumps({"pid": os.getpid(), "started_at":
                     datetime.now(timezone.utc).isoformat()}, ensure_ascii=False),
         encoding="utf-8")
     return lock
@@ -122,8 +151,8 @@ def _load_split() -> dict | None:
 def _cmd_snapshot(args) -> int:
     lock = _acquire_lock()
     if lock is None:
-        print(f"ERROR: fresh sync lock present ({LOCK_NAME}, <24 h old); "
-              "another sync may be running.")
+        print(f"ERROR: fresh sync lock present ({LOCK_NAME}, <24 h old, "
+              "live holder); another sync may be running.")
         return 1
     try:
         config.OUT_DIR.mkdir(parents=True, exist_ok=True)
