@@ -17,6 +17,12 @@ files under ``DATA_DIR/out/``):
   ``out/publish/`` and upload it to Hugging Face (``HF_TOKEN`` env).
 - ``validate``             re-check the latest snapshot's per-book counts
   against the live ``/v1/browse/books`` catalog.
+- ``export [--raw P] [--snap ID] [--allow-partial] [--verify-live]
+  [--dest D]``     build the standalone, integrity-hashed corpus export
+  (records.jsonl + records.parquet + raw.jsonl + manifest.json +
+  data_dictionary.md + mappings.json + README.md) under
+  ``out/export/<snap_id>/``. Default source is the latest complete
+  snapshot in the store; the export is ES-reimportable (see its README).
 
 Concurrent-run guard: a single lock file ``DATA_DIR/state/sync.lock``.
 The lock stores the holder's pid. A fresh lock (<24 h old) held by a
@@ -35,7 +41,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import analytics, config, detect, http, normalize, publish, snapshot, store
+from . import (analytics, config, detect, exporter, http, normalize, publish,
+               snapshot, store)
 
 LOCK_NAME = "sync.lock"
 _LOCK_MAX_AGE_S = 24 * 3600
@@ -314,6 +321,55 @@ def _cmd_publish(args) -> int:
     return 0
 
 
+def _cmd_export(args) -> int:
+    conn = store.open_db()
+    if args.raw:
+        raw_path = Path(args.raw)
+        if not raw_path.is_file():
+            print(f"ERROR: --raw file not found: {raw_path}")
+            return 1
+        snap_id = args.snap or raw_path.stem
+    else:
+        snap_id = args.snap or store.latest_snapshot(
+            conn, complete_only=not args.allow_partial)
+        if snap_id is None:
+            scope = "complete" if not args.allow_partial else ""
+            print(f"ERROR: no {scope}snapshot in the store; run `snapshot` "
+                  "first (or pass --raw).")
+            return 1
+        row = conn.execute("SELECT raw_path FROM snapshots WHERE id=?",
+                           (snap_id,)).fetchone()
+        if row is None:
+            print(f"ERROR: snapshot {snap_id} not in the store "
+                  "(scoped runs are not stored); pass --raw <path>.")
+            return 1
+        raw_path = store.resolve_raw_path(row[0])
+    if not raw_path.is_file():
+        print(f"ERROR: raw snapshot file not found: {raw_path}")
+        return 1
+
+    status = store.snapshot_status(conn, snap_id) or "unknown"
+    verify_live = None
+    if args.verify_live:
+        from . import fetch
+        verify_live = fetch.books()
+
+    dest = Path(args.dest) if args.dest else config.OUT_DIR / "export" / snap_id
+    manifest = exporter.build_export(
+        dest, raw_path=raw_path, snap_id=snap_id, status=status,
+        verify_live_books=verify_live)
+    print(f"export {snap_id} (status={status}): {manifest['docs_total']} docs, "
+          f"{len(manifest['books'])} books -> {dest}")
+    cc = manifest.get("completeness_check")
+    if cc is not None:
+        if cc["incomplete"]:
+            print(f"  WARNING: books incomplete vs live catalog: "
+                  f"{cc['incomplete']}")
+        else:
+            print("  completeness vs live catalog: OK")
+    return 0
+
+
 def _cmd_validate(_args) -> int:
     conn = store.open_db()
     latest = store.latest_snapshot(conn)
@@ -371,6 +427,26 @@ def build_parser() -> argparse.ArgumentParser:
     vp = sub.add_parser("validate", help="re-check latest snapshot against "
                                          "the live book catalog")
     vp.set_defaults(func=_cmd_validate)
+
+    xp = sub.add_parser("export",
+                        help="standalone integrity-hashed corpus export "
+                             "(JSONL+Parquet+manifest, ES-reimportable)")
+    xp.add_argument("--raw", metavar="PATH",
+                    help="raw snapshot JSONL to export (default: latest "
+                         "complete snapshot in the store)")
+    xp.add_argument("--snap", metavar="ID",
+                    help="snapshot id (default: inferred from the --raw "
+                         "filename, or the latest complete snapshot)")
+    xp.add_argument("--allow-partial", action="store_true",
+                    help="allow exporting the latest snapshot even if its "
+                         "status is 'partial'")
+    xp.add_argument("--verify-live", action="store_true",
+                    help="query the live book catalog and record "
+                         "completeness in the manifest (network call)")
+    xp.add_argument("--dest", metavar="DIR",
+                    help="output directory (default: "
+                         "DATA_DIR/out/export/<snap_id>)")
+    xp.set_defaults(func=_cmd_export)
     return p
 
 
@@ -380,8 +456,8 @@ def main(argv: list[str] | None = None) -> int:
         return args.func(args)
     except (snapshot.IncompleteSnapshotError,
             detect.IncompleteSnapshotError,
-            publish.PublishError, http.HttpError, OSError,
-            ValueError) as exc:
+            publish.PublishError, exporter.ExportError, http.HttpError,
+            OSError, ValueError) as exc:
         print(f"ERROR: {exc}")
         return 1
 
