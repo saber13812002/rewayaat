@@ -26,6 +26,7 @@ Covered:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -308,9 +309,10 @@ def test_iter_graph_rows_narrator_s_order_and_keys():
                                         "source": "Al-Kāfī"}}
     assert rows["chapter"][0]["chapter_key"] == "Al-Kāfi|2|1|Chapter 1|"
     assert rows["chapter"][0]["node"]["part_ar"] == "الاوّل"
-    # relationship rows
+    # relationship rows (in_book carries chapter_key: ST_REL_IN MATCHes it)
     assert rows["in_book"] == [{"sid": "Al-Kafi-Saduq:1",
-                                "book_key": "Al-Kāfi|2"}]
+                                "book_key": "Al-Kāfi|2",
+                                "chapter_key": "Al-Kāfi|2|1|Chapter 1|"}]
     assert rows["has_chapter"] == [{"book_key": "Al-Kāfi|2",
                                     "chapter_key": "Al-Kāfi|2|1|Chapter 1|"}]
     # no enrichment -> no entity/topic/verse/candidate rows
@@ -362,6 +364,22 @@ def test_constraints_cover_all_merge_keys():
                 "c.chapter_key", "v.verse_key", "t.value", "e.entity_key"):
         assert key in joined, key
     assert joined.count("CREATE CONSTRAINT IF NOT EXISTS") == 7
+
+
+def test_statements_reference_only_emitted_row_fields():
+    """Every r.<field> a statement reads must exist on its rows.
+
+    Guards against a statement referencing a key field the row kind does not
+    carry (e.g. ST_REL_IN reading r.chapter_key from an in_book row that only
+    had sid/book_key -> MATCH {chapter_key: null} -> row silently dropped).
+    """
+    rows = raggraph.iter_graph_rows(_raw_line(1), _enrichment_rec(1), "snap-T")
+    for st, kind, _key in raggraph._NODE_ORDER + raggraph._REL_ORDER:
+        refs = set(re.findall(r"\br\.(\w+)", st))
+        part = rows.get(kind) or []
+        assert part, f"row kind {kind} emitted no rows in fixture"
+        for f in refs:
+            assert all(f in r for r in part), (kind, f)
 
 
 def test_statements_shape():

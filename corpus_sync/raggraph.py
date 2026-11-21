@@ -184,7 +184,7 @@ _NODE_ORDER: tuple[tuple[str, str, str], ...] = (
 #: Relationship statements in execution order. (statement, row kind, dedup key)
 #: — the key is the tuple of fields that identifies one relationship.
 _REL_ORDER: tuple[tuple[str, str, tuple[str, ...]], ...] = (
-    (ST_REL_IN, "in_book", ("sid", "book_key")),
+    (ST_REL_IN, "in_book", ("sid", "book_key", "chapter_key")),
     (ST_REL_HAS_CHAPTER, "has_chapter", ("book_key", "chapter_key")),
     (ST_REL_NARRATOR, "narrated_by", ("sid", "narrator_id", "position")),
     (ST_REL_ENTITY, "mentions_entity", ("sid", "entity_key")),
@@ -531,7 +531,7 @@ def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
                      "node": {"part": part,
                               "part_ar": str(raw.get("part_ar") or ""),
                               "chapter": chapter, "section": section}}],
-        "in_book": [{"sid": sid, "book_key": bkey}],
+        "in_book": [{"sid": sid, "book_key": bkey, "chapter_key": ckey}],
         "has_chapter": [{"book_key": bkey, "chapter_key": ckey}],
         "narrator": [], "narrated_by": [],
         "entity": [], "mentions_entity": [],
