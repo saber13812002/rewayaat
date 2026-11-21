@@ -1,0 +1,7 @@
+{
+ "pid": 19668,
+ "command": "C:\\Users\\s.tabatabaei\\AppData\\Local\\Programs\\Python\\Python313\\python.exe  tmp\\wait_forever.py",
+ "process_started_at": "2026-11-16T15:13:15Z",
+ "recorded_at": "2026-11-16T16:12:00Z",
+ "note": "wait_forever.py recovery poller; created 15:13:15 UTC (child of dead terminal PID 6612, verified via Get-CimInstance Win32_Process); do not restart without inspection"
+}

@@ -1,0 +1,44 @@
+HOURLY PROGRESS REPORT
+Generated (UTC): 2026-11-16 16:11:56
+
+1. PROCESS STATUS
+   PID: 19668
+   State: ALIVE
+   Runtime: 0 h 58 m (since 2026-11-16T15:13:15Z)
+
+2. CURRENT STAGE
+   Task: wait for server-side rebuild of Al-Kafi / Ghurar (rewayaat.info)
+   Subtask: polling tmp/probe_recovery.py every 600 s
+   Last Completed Operation: poll#6 @ 16:03:28 -> STILL_DEGRADED
+
+3. ACTUAL PROGRESS IN LAST HOUR
+   Previous Counter (polls): 0
+   Current Counter (polls): 6
+   Completed This Hour (polls): 6
+   Successful Operations (polls with probe result): 6
+   Failed Operations (crash/fast probes this hour): 2
+   Retry Count: N/A (probe retries are internal; not logged per poll)
+
+4. CUMULATIVE PROGRESS
+   Total Completed: 6 recovery polls since 15:13:18 UTC (poll#1)
+   Total Expected: unknown (server rebuild duration not announced; 12 h poller cap)
+   Percentage: NOT REPORTED (total unknown)
+
+5. ERRORS AND BLOCKERS
+   New: see section 3 failed operations
+   Persistent: rewayaat.info lookup for 'Al-Kafi' total=10000 expected=14242 (server-side rebuild in progress)
+   Network Status: local DNS/HTTPS OK at last probe (16:05:13)
+   External Dependencies: rewayaat.info rebuild (owner: user, confirmed twice)
+
+6. CHECKPOINT
+   Latest: snapshot_state.json -> snapshot-20261115-231313-1.jsonl (mtime 23:13:13)
+   Is Resume Possible: yes (poller log + probe file persist; restart poller only after inspecting why previous instance stopped)
+
+7. EXECUTION HEALTH
+   DEGRADED
+   - poller alive and polling, but 2/6 polls show probe=0s (suspected probe crash / stale probe file)
+
+8. EVIDENCE
+   Log References: tmp/recovery_forever.log (poll#6 last), tmp/probe_recovery.txt (mtime 16:05:13)
+   Counter References: monitoring/history.jsonl (this + prior ticks)
+   Last Successful Output: RESULT: STILL_DEGRADED: book:'Al-Kāfi' total=10000 expected=14242

@@ -1,0 +1,43 @@
+{
+ "hour": "2026-11-21T00",
+ "state": "RUNNING",
+ "raw": {
+  "file": "snapshot-20261117-204731-1.jsonl",
+  "lines": 29163,
+  "size_mb": 154.3
+ },
+ "state_file": {
+  "snapshot": "snapshot-20261117-204731-1.jsonl",
+  "completed": 3306,
+  "totals": 3327,
+  "last_activity": "2026-11-21T00:08:01Z",
+  "sha256": ""
+ },
+ "failed": [
+  "book:Al-Amālī",
+  "book:Al-Khiṣāl",
+  "book:Al-Kāfi chapter:Another Chapter",
+  "book:Al-Kāfi chapter:Enlightening Points Deduced from the Holy Quran about Leadership with Divine Authority)",
+  "book:Al-Kāfi chapter:Hadith",
+  "book:Al-Kāfi chapter:Inheritance",
+  "book:Al-Kāfi chapter:Rare Ahadith",
+  "book:Al-Kāfi chapter:Rare Ahadith ",
+  "book:Al-Kāfi chapter:The Rare Ahadith",
+  "book:Al-Tawḥīd",
+  "book:Kitāb al-Ghayba",
+  "book:Kitāb al-Muʾmin",
+  "book:Kitāb al-Zuhd",
+  "book:Kāmil al-Ziyārāt",
+  "book:Man Lā Yaḥḍuruh al-Faqīh",
+  "book:Maʿānī al-ʾAkhbār",
+  "book:Mishkāt al-Anwār",
+  "book:Muʿjam al-Aḥādīth al-Muʿtabara"
+ ],
+ "db": null,
+ "proc": [
+  "777101 /home/saber/rewayaat/.venv/bin/python -m corpus_sync.cli snapshot"
+ ],
+ "rate_docs_h": 29132.3,
+ "eta_h": 0.73,
+ "warnings": []
+}

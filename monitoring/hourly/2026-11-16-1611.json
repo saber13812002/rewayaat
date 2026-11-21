@@ -1,0 +1,58 @@
+{
+ "generated_at": "2026-11-16T16:11:55Z",
+ "project": "rewayaat corpus-sync (recovery wait -> baseline snapshot)",
+ "process": {
+  "pid": 19668,
+  "alive": true,
+  "cpu_s": 0.140625,
+  "command": "C:\\Users\\s.tabatabaei\\AppData\\Local\\Programs\\Python\\Python313\\python.exe  tmp\\wait_forever.py",
+  "recorded_at": "2026-11-16T16:12:00Z"
+ },
+ "current_task": {
+  "task": "wait for server-side rebuild of Al-Kafi / Ghurar (rewayaat.info)",
+  "stage": "polling tmp/probe_recovery.py every 600 s",
+  "last_completed_operation": "poll#6 @ 16:03:28 -> STILL_DEGRADED"
+ },
+ "progress": {
+  "polls_completed": 6,
+  "polls_total": null,
+  "probes_still_degraded": 6,
+  "probes_recovered": 0,
+  "probes_crash_or_fast": 2,
+  "result_transitions": 0,
+  "snapshot_run4": "not started",
+  "note": "server rebuild duration unknown -> percentage not reported"
+ },
+ "last_activity": {
+  "last_poll": "16:03:28",
+  "last_poll_age_s": 507,
+  "last_probe_file_write": "16:05:13",
+  "last_probe_result": "RESULT: STILL_DEGRADED: book:'Al-K\u0101fi' total=10000 expected=14242"
+ },
+ "last_hour": {
+  "polls": 6,
+  "degraded": 6,
+  "crash": 0,
+  "errors_in_log": 0,
+  "retries": null
+ },
+ "main_mission": {
+  "sync_lock": false,
+  "snapshot_state": {
+   "snapshot": "snapshot-20261115-231313-1.jsonl",
+   "mtime_utc": "23:13:13"
+  },
+  "raw_files": 0,
+  "raw_newest": null,
+  "db_exists": false
+ },
+ "blockers": [
+  "rewayaat.info: Al-Kafi lookup total=10000 expected=14242 (server rebuild in progress, user-confirmed)",
+  "second rebuild planned for the two >10k books (user confirmed 09:42 UTC)"
+ ],
+ "health": "DEGRADED",
+ "health_reasons": [
+  "poller alive and polling, but 2/6 polls show probe=0s (suspected probe crash / stale probe file)"
+ ],
+ "stale_write_signal": false
+}
