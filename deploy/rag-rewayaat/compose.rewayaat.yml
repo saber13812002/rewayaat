@@ -1,0 +1,31 @@
+# Rewayat RAG (Hadith corpus: Al-Kafi & friends): independent drag instance,
+# port 8107. Mirrors compose.khamenei.yml (image dedicated-rag:0.1.1).
+name: rewayaat
+services:
+  rewayaat-rag:
+    image: dedicated-rag:0.1.1
+    container_name: rewayaat-rag
+    restart: unless-stopped
+    user: "1001:1001"
+    ports:
+      - "127.0.0.1:8107:8100"
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    deploy:
+      resources:
+        limits: { cpus: "4.0", memory: 8G }
+    volumes:
+      - ./data/rewayaat:/data
+      - ./openapi:/app/openapi:ro
+    env_file:
+      - ./env/rewayaat.env
+    environment:
+      DRAG_SOURCE_ID: rewayaat
+      DRAG_DB_PATH: /data/drag.db
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8100/health',timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

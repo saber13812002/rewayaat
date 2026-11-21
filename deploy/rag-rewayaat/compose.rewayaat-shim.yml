@@ -1,0 +1,26 @@
+# Rewayat RAG SSE shim (PCM-23 pattern): drag /v1/ask (JSON) -> portal
+# legacy SSE POST /api/v1/qa/stream (step/done/error).
+# Host network + loopback bind => only reachable on 127.0.0.1:8130;
+# public/LAN path via the nginx bridge vhost (172.30.0.133).
+name: rewayaat
+services:
+  rewayaat-shim:
+    image: dedicated-rag:0.1.1
+    container_name: rag-rewayaat-shim
+    restart: unless-stopped
+    network_mode: host
+    entrypoint: ["python"]
+    command: ["/shim/rag-sse-shim.py"]
+    volumes:
+      - ./shim:/shim:ro
+    env_file:
+      - ./shim/shim-rewayaat.env
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8130/health',timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

@@ -366,10 +366,15 @@ def _cmd_export(args) -> int:
         from . import fetch
         verify_live = fetch.books()
 
+    enr_path = Path(args.enrich) if args.enrich else None
+    if enr_path is not None and not enr_path.is_file():
+        print(f"ERROR: --enrich file not found: {enr_path}")
+        return 1
+
     dest = Path(args.dest) if args.dest else config.OUT_DIR / "export" / snap_id
     manifest = exporter.build_export(
         dest, raw_path=raw_path, snap_id=snap_id, status=status,
-        verify_live_books=verify_live)
+        verify_live_books=verify_live, enrichment_path=enr_path)
     print(f"export {snap_id} (status={status}): {manifest['docs_total']} docs, "
           f"{len(manifest['books'])} books -> {dest}")
     cc = manifest.get("completeness_check")
@@ -379,11 +384,7 @@ def _cmd_export(args) -> int:
                   f"{cc['incomplete']}")
         else:
             print("  completeness vs live catalog: OK")
-    if args.enrich:
-        enr_path = Path(args.enrich)
-        if not enr_path.is_file():
-            print(f"ERROR: --enrich file not found: {enr_path}")
-            return 1
+    if enr_path is not None:
         em = manifest.get("enrichment") or {}
         print(f"  enrichment merged from {enr_path.name}: "
               f"{em.get('enriched_docs')} docs")
