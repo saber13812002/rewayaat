@@ -45,7 +45,7 @@ PROGRESS_NAME = "enrich_progress.log"
 SUMMARY_NAME = "summary.json"
 STATE_FLUSH_EVERY = 25
 EMBED_BATCH = 16
-MAX_BUDGET = 8192
+MAX_BUDGET = 16384
 
 
 class LlmError(RuntimeError):
@@ -194,8 +194,10 @@ class LlmClient:
 
     Retry policy mirrors corpus_sync.http: transport errors, 408, 429 and 5xx
     are retried with exponential backoff; other 4xx fail immediately. A
-    reasoning-model budget exhaustion (null content + finish_reason=length)
-    retries with a doubled completion budget (capped at MAX_BUDGET).
+    reasoning-model budget exhaustion — either content=null OR a TRUNCATED
+    non-null content with finish_reason=length — retries with a doubled
+    completion budget (capped at MAX_BUDGET). Truncated content must not be
+    accepted: it would fail JSON parsing downstream.
     """
 
     def __init__(self, base_url: str | None = None, api_key: str | None = None,
@@ -258,6 +260,13 @@ class LlmClient:
                             f"(budget {budget})")
                     raise LlmError(
                         f"null content, finish_reason={finish!r}")
+                if finish == "length":
+                    # Content exists but was cut off mid-generation (reasoning
+                    # budget exhausted): a truncated JSON object will fail to
+                    # parse downstream, so treat it like a budget failure.
+                    raise _BudgetExhausted(
+                        f"truncated content, finish_reason=length "
+                        f"(budget {budget}, {len(content)} chars)")
                 usage = data.get("usage") or {}
                 return {
                     "content": content,

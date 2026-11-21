@@ -303,8 +303,37 @@ def test_chat_budget_escalation(monkeypatch):
     res = client.chat([{"role": "user", "content": "p"}])
     assert res["content"] == VALID_JSON
     budgets = [c[1]["max_tokens"] for c in sess.calls]
-    assert budgets[0] == 2048
-    assert budgets[1] == 4096, "budget must double after null-content length"
+    assert budgets[0] == 4096
+    assert budgets[1] == 8192, "budget must double after null-content length"
+
+
+def test_chat_truncated_content_budget_escalation(monkeypatch):
+    """content non-null but finish_reason=length -> doubled budget retry."""
+    monkeypatch.setattr(enrich.time, "sleep", lambda s: None)
+    sess = _FakeSession([
+        _chat_ok('{"persian": "cut off mid', finish="length"),
+        _chat_ok(VALID_JSON),
+    ])
+    client = enrich.LlmClient(base_url="http://x", api_key="k",
+                              model="m", timeout=1, max_retries=3,
+                              backoff_s=0, session=sess)
+    res = client.chat([{"role": "user", "content": "p"}])
+    assert res["content"] == VALID_JSON
+    budgets = [c[1]["max_tokens"] for c in sess.calls]
+    assert budgets == [4096, 8192], "truncated length must double budget"
+
+
+def test_chat_truncated_exhausts_retries(monkeypatch):
+    """Repeatedly truncated at max budget -> LlmError (no infinite loop)."""
+    monkeypatch.setattr(enrich.time, "sleep", lambda s: None)
+    sess = _FakeSession([_chat_ok('{"persian": "x', finish="length")] * 3)
+    client = enrich.LlmClient(base_url="http://x", api_key="k",
+                              model="m", timeout=1, max_retries=3,
+                              backoff_s=0, session=sess)
+    import pytest
+    with pytest.raises(enrich.LlmError):
+        client.chat([{"role": "user", "content": "p"}])
+    assert len(sess.calls) == 3
 
 
 def test_chat_429_retried_then_ok(monkeypatch):
