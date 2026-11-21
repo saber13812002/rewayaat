@@ -62,3 +62,14 @@ LLM_MIN_BACKOFF_S: float = 2.0
 # Embedding models (verified dims): q1-embedding-4b=2560, q1-embedding-06b=1024.
 LLM_EMBED_MODEL: str = os.environ.get("LLM_EMBED_MODEL", "q1-embedding-06b")
 ENRICH_PROMPT_VERSION: str = "1.0"  # bump when the prompt text changes
+
+# --- Phase 4: RAG + knowledge graph backends (s52) ------------------------------
+# Existing infrastructure (not rebuilt): Elasticsearch 8.13.4 container
+# "pct-elasticsearch" (no auth) and Neo4j 2025.10.1-enterprise container
+# "neo4j_db" from ~/saberprojects/graph-rag/ compose (fresh/empty store).
+ES_URL: str = os.environ.get("ES_URL", "http://127.0.0.1:9200")
+ES_INDEX: str = os.environ.get("ES_INDEX", "rewayaat_corpus_v1")
+NEO4J_URI: str = os.environ.get("NEO4J_URI", "bolt://127.0.0.1:7687")
+NEO4J_USER: str = os.environ.get("NEO4J_USER", "neo4j")
+# NOT committed by default; on s52 it mirrors ~/saberprojects/graph-rag/.env.
+NEO4J_PASSWORD: str = os.environ.get("NEO4J_PASSWORD", "")

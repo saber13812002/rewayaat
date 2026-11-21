@@ -23,6 +23,18 @@ files under ``DATA_DIR/out/``):
   data_dictionary.md + mappings.json + README.md) under
   ``out/export/<snap_id>/``. Default source is the latest complete
   snapshot in the store; the export is ES-reimportable (see its README).
+- ``load-es [--raw P] [--snap ID] [--embed] [--limit N] [--index I]``
+  Phase 4: bulk-index export docs (+ enrichment + vectors) into
+  Elasticsearch with doc id = source_id (idempotent re-runs).
+- ``load-graph [--raw P] [--snap ID] [--limit N] [--related] [--rebuild]``
+  Phase 4: load the Neo4j knowledge graph (UNWIND-MERGE, checkpointed);
+  ``--related`` runs the deterministic RELATED_TO second pass.
+- ``rag QUERY [--lang ar|en|fa|auto] [--book B] [--hadith N]
+  [--volume V] [--top N] [--no-graph] [--index I]``
+  Phase 4: hybrid ES retrieval (multi_match + kNN, RRF), 1-hop graph
+  expansion, LLM answer with verified ⟦…⟧ citations + provenance log.
+- ``graph-stats``  Phase 4: Neo4j label/relationship counts.
+- ``es-stats [--index I]``  Phase 4: ES index count/shards/health.
 
 Concurrent-run guard: a single lock file ``DATA_DIR/state/sync.lock``.
 The lock stores the holder's pid. A fresh lock (<24 h old) held by a
@@ -42,7 +54,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import (analytics, config, detect, enrich, exporter, http, normalize,
-               publish, snapshot, store)
+               publish, raggraph, snapshot, store)
 
 LOCK_NAME = "sync.lock"
 _LOCK_MAX_AGE_S = 24 * 3600
@@ -425,6 +437,133 @@ def _cmd_enrich(args) -> int:
     return 0
 
 
+def _resolve_raw(args):
+    """Resolve (raw_path, snap_id) from --raw/--snap/--allow-partial.
+
+    Prints an error and returns None when resolution fails.
+    """
+    conn = store.open_db()
+    if args.raw:
+        raw_path = Path(args.raw)
+        if not raw_path.is_file():
+            print(f"ERROR: --raw file not found: {raw_path}")
+            return None
+        snap_id = args.snap or raw_path.stem
+    else:
+        snap_id = args.snap or store.latest_snapshot(
+            conn, complete_only=not args.allow_partial)
+        if snap_id is None:
+            scope = "complete" if not args.allow_partial else ""
+            print(f"ERROR: no {scope}snapshot in the store; run `snapshot` "
+                  "first (or pass --raw).")
+            return None
+        row = conn.execute("SELECT raw_path FROM snapshots WHERE id=?",
+                           (snap_id,)).fetchone()
+        if row is None:
+            print(f"ERROR: snapshot {snap_id} not in the store "
+                  "(scoped runs are not stored); pass --raw <path>.")
+            return None
+        raw_path = store.resolve_raw_path(row[0])
+    if not raw_path.is_file():
+        print(f"ERROR: raw snapshot file not found: {raw_path}")
+        return None
+    return raw_path, snap_id
+
+
+def _cmd_load_es(args) -> int:
+    res = _resolve_raw(args)
+    if res is None:
+        return 1
+    raw_path, snap_id = res
+    if args.embed:
+        edir = config.OUT_DIR / "enrich" / snap_id
+        if not (edir / enrich.EMBED_NAME).is_file():
+            esum = enrich.run_embeddings(
+                raw_path, snap_id, client=enrich.LlmClient())
+            print(f"embeddings: {esum['vectors']} vectors "
+                  f"(model={esum['model']}) -> {esum['out_dir']}")
+    summary = raggraph.load_es(raw_path, snap_id, index=args.index,
+                               limit=args.limit)
+    print(f"load-es {snap_id}: {summary['indexed']}/{summary['total']} "
+          f"docs -> {summary['index']} (errors={summary['errors']}, "
+          f"no_vector={summary['no_vector']}, "
+          f"enriched={summary['enriched']}, vectors={summary['vectors']})")
+    return 0 if not summary["errors"] else 1
+
+
+def _cmd_load_graph(args) -> int:
+    res = _resolve_raw(args)
+    if res is None:
+        return 1
+    raw_path, snap_id = res
+    driver = raggraph.open_neo4j()
+    try:
+        enr_map = enrich.load_enrichment(
+            config.OUT_DIR / "enrich" / snap_id / enrich.OUTPUT_NAME)
+        summary = raggraph.load_graph(
+            driver, raw_path, enr_map, snap_id=snap_id, limit=args.limit,
+            rebuild=args.rebuild)
+        print(f"load-graph {snap_id}: {summary['loaded']} loaded, "
+              f"{summary['skipped_completed']} already done, "
+              f"total {summary['total']} -> {summary['state']}")
+        if args.related:
+            rel = raggraph.run_related_pass(driver)
+            print(f"related-pass: {rel['related_created']} RELATED_TO "
+                  f"created over {rel['narrations']} narrations "
+                  f"(top={rel['top']}, min_shared={rel['min_shared']})")
+    finally:
+        driver.close()
+    return 0
+
+
+def _cmd_rag(args) -> int:
+    client = enrich.LlmClient()
+    driver = None
+    if not args.no_graph:
+        try:
+            driver = raggraph.open_neo4j()
+        except Exception as exc:  # graph is an enhancement, not required
+            print(f"WARNING: graph expansion disabled for this run: {exc}")
+    try:
+        result = raggraph.run_rag(
+            args.query, lang=args.lang, book=args.book, hadith=args.hadith,
+            volume=args.volume, top=args.top, use_graph=driver is not None,
+            es=raggraph.EsClient(), driver=driver, client=client,
+            index=args.index)
+    finally:
+        if driver is not None:
+            driver.close()
+    print(result["answer"] or "(no answer)")
+    cit = result.get("citations")
+    if cit:
+        print(f"citations_verified: {cit['verified_count']}/{cit['total']} "
+              f"({cit.get('status', 'n/a')})")
+    print(f"provenance log: {result['provenance_log']}")
+    return 0
+
+
+def _cmd_graph_stats(_args) -> int:
+    driver = raggraph.open_neo4j()
+    try:
+        stats = raggraph.graph_stats(driver)
+    finally:
+        driver.close()
+    print("labels:")
+    for lbl, c in stats["labels"].items():
+        print(f"  {lbl}: {c}")
+    print("relationships:")
+    for rel, c in stats["relationships"].items():
+        print(f"  {rel}: {c}")
+    return 0
+
+
+def _cmd_es_stats(args) -> int:
+    stats = raggraph.es_stats(raggraph.EsClient(), index=args.index)
+    print(f"{stats['index']}: count={stats['count']} "
+          f"shards={stats['shards']} health={stats['health']}")
+    return 0
+
+
 def _cmd_validate(_args) -> int:
     conn = store.open_db()
     latest = store.latest_snapshot(conn)
@@ -530,6 +669,77 @@ def build_parser() -> argparse.ArgumentParser:
                     help="after enriching, also generate embeddings "
                          "(arabic || english || persian) for enriched docs")
     ep.set_defaults(func=_cmd_enrich)
+
+    lep = sub.add_parser(
+        "load-es", help="Phase 4: index export docs into Elasticsearch "
+                        "(doc id = source_id, idempotent)")
+    lep.add_argument("--raw", metavar="PATH",
+                     help="raw snapshot JSONL to index (default: latest "
+                          "complete snapshot in the store)")
+    lep.add_argument("--snap", metavar="ID",
+                     help="snapshot id (default: inferred from the --raw "
+                          "filename, or the latest complete snapshot)")
+    lep.add_argument("--allow-partial", action="store_true",
+                     help="allow the latest snapshot even if its status is "
+                          "'partial'")
+    lep.add_argument("--embed", action="store_true",
+                     help="generate embeddings first if embeddings.jsonl "
+                          "is missing")
+    lep.add_argument("--limit", type=int, default=None, metavar="N",
+                     help="index at most N docs")
+    lep.add_argument("--index", metavar="NAME",
+                     help="ES index name (default: config.ES_INDEX)")
+    lep.set_defaults(func=_cmd_load_es)
+
+    lgp = sub.add_parser(
+        "load-graph", help="Phase 4: load the Neo4j knowledge graph "
+                           "(checkpointed UNWIND-MERGE)")
+    lgp.add_argument("--raw", metavar="PATH",
+                     help="raw snapshot JSONL to load (default: latest "
+                          "complete snapshot in the store)")
+    lgp.add_argument("--snap", metavar="ID",
+                     help="snapshot id (default: inferred from the --raw "
+                          "filename, or the latest complete snapshot)")
+    lgp.add_argument("--allow-partial", action="store_true",
+                     help="allow the latest snapshot even if its status is "
+                          "'partial'")
+    lgp.add_argument("--limit", type=int, default=None, metavar="N",
+                     help="load at most N docs")
+    lgp.add_argument("--related", action="store_true",
+                     help="run the deterministic RELATED_TO second pass "
+                          "after loading")
+    lgp.add_argument("--rebuild", action="store_true",
+                     help="clear the whole graph first (MATCH DETACH DELETE)")
+    lgp.set_defaults(func=_cmd_load_graph)
+
+    rp = sub.add_parser(
+        "rag", help="Phase 4: trilingual RAG query with verified citations")
+    rp.add_argument("query", help="question (ar / en / fa)")
+    rp.add_argument("--lang", choices=("ar", "en", "fa", "auto"),
+                    default="auto", help="answer language (default: auto)")
+    rp.add_argument("--book", metavar="NAME",
+                    help="restrict to one book (exact name)")
+    rp.add_argument("--hadith", metavar="N",
+                    help="restrict to one hadith number")
+    rp.add_argument("--volume", metavar="V",
+                    help="restrict to one volume")
+    rp.add_argument("--top", type=int, default=20, metavar="N",
+                    help="top-N fused candidates (default: 20)")
+    rp.add_argument("--no-graph", action="store_true",
+                    help="skip Neo4j 1-hop expansion")
+    rp.add_argument("--index", metavar="NAME",
+                    help="ES index name (default: config.ES_INDEX)")
+    rp.set_defaults(func=_cmd_rag)
+
+    gps = sub.add_parser("graph-stats",
+                         help="Phase 4: Neo4j label/relationship counts")
+    gps.set_defaults(func=_cmd_graph_stats)
+
+    eps = sub.add_parser("es-stats",
+                         help="Phase 4: ES index count/shards/health")
+    eps.add_argument("--index", metavar="NAME",
+                     help="ES index name (default: config.ES_INDEX)")
+    eps.set_defaults(func=_cmd_es_stats)
     return p
 
 
@@ -540,7 +750,7 @@ def main(argv: list[str] | None = None) -> int:
     except (snapshot.IncompleteSnapshotError,
             detect.IncompleteSnapshotError,
             publish.PublishError, exporter.ExportError, enrich.LlmError,
-            http.HttpError, OSError, ValueError) as exc:
+            http.HttpError, OSError, ValueError, RuntimeError) as exc:
         print(f"ERROR: {exc}")
         return 1
 

@@ -7,3 +7,4 @@ diff-match-patch>=20230402
 huggingface_hub>=0.23
 PyYAML>=6.0
 pytest>=8.0
+neo4j>=5.26,<6
