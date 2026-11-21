@@ -292,20 +292,31 @@ def test_iter_graph_rows_narrator_s_order_and_keys():
     assert narr[0]["node"] == {"name_ar": "His father",
                                "name_en": "Abu al-Hasan", "slug": "father"}
     assert narr[1]["node"]["name_en"] == "Ali ibn Ibrahim"
+    assert rows["narrated_by"] == [
+        {"sid": "Al-Kafi-Saduq:1", "narrator_id": "n2", "position": 1},
+        {"sid": "Al-Kafi-Saduq:1", "narrator_id": "n1", "position": 2},
+    ]
     n = rows["narration"][0]
-    assert n["book_key"] == "Al-Kāfi|2"
-    assert n["chapter_key"] == "Al-Kāfi|2|1|Chapter 1|"
     assert n["node"]["hadith_number"] == "1"
     assert n["node"]["enriched"] == 0 and n["node"]["persian"] == ""
     ref = normalize.normalize_doc(
         line["raw"], book_slug="al-kāfi", fetched_at=line["fetched_at"])
     assert n["node"]["record_hash"] == ref["record_hash"]
-    assert n["book"] == {"book": "Al-Kāfi", "volume": "2",
-                         "source": "Al-Kāfī"}
-    assert n["chapter"]["part_ar"] == "الاوّل"
+    # shared-node rows carry their unique keys
+    assert rows["book"][0] == {"book_key": "Al-Kāfi|2",
+                               "node": {"book": "Al-Kāfi", "volume": "2",
+                                        "source": "Al-Kāfī"}}
+    assert rows["chapter"][0]["chapter_key"] == "Al-Kāfi|2|1|Chapter 1|"
+    assert rows["chapter"][0]["node"]["part_ar"] == "الاوّل"
+    # relationship rows
+    assert rows["in_book"] == [{"sid": "Al-Kafi-Saduq:1",
+                                "book_key": "Al-Kāfi|2"}]
+    assert rows["has_chapter"] == [{"book_key": "Al-Kāfi|2",
+                                    "chapter_key": "Al-Kāfi|2|1|Chapter 1|"}]
     # no enrichment -> no entity/topic/verse/candidate rows
     assert rows["entity"] == [] and rows["topic"] == []
-    assert rows["verse"] == [] and rows["candidate"] == []
+    assert rows["verse"] == [] and rows["references"] == []
+    assert rows["candidate_topic"] == []
 
 
 def test_iter_graph_rows_enrichment():
@@ -327,16 +338,19 @@ def test_iter_graph_rows_enrichment():
     assert rows["narration"][0]["node"]["persian"] == "ترجمه"
     assert rows["narration"][0]["node"]["enriched"] == 1
     assert rows["narration"][0]["node"]["validation_status"] == "pass"
-    # topic dedupe via normalize
-    assert [t["value"] for t in rows["topic"]] == ["justice"]
+    # topic dedupe via normalize; candidate topics also become Topic nodes
+    assert [t["value"] for t in rows["topic"]] == ["justice", "faith"]
+    assert rows["has_topic"] == [{"sid": "Al-Kafi-Saduq:1", "value": "justice"}]
     # entity keys (missing type -> concept; dash normalizes to space)
     assert [e["entity_key"] for e in rows["entity"]] == [
         "person:imam ali", "concept:no type"]
+    assert [m["entity_key"] for m in rows["mentions_entity"]] == [
+        "person:imam ali", "concept:no type"]
     # verse validation (int, 1..114, ayah>=1)
     assert [v["verse_key"] for v in rows["verse"]] == ["2:255"]
-    assert rows["verse"][0]["ref_type"] == "mention"
+    assert rows["references"][0]["ref_type"] == "mention"
     # candidate dedupe
-    assert [c["value"] for c in rows["candidate"]] == ["faith"]
+    assert [c["value"] for c in rows["candidate_topic"]] == ["faith"]
 
 
 # --- Cypher statements --------------------------------------------------------------------
@@ -499,11 +513,11 @@ def test_load_graph_state_resume_and_rebuild(tmp_data_dir, tmp_path):
     constraints = [c for c in driver.calls if c[0].startswith(
         "CREATE CONSTRAINT")]
     assert len(constraints) == len(raggraph.CONSTRAINTS)
-    # narration rows land first in the batch
+    # node-creation rows land first in the batch (narration, then book)
     unwinds = [st for st, _ in driver.calls
                if st.lstrip().startswith("UNWIND")]
     assert unwinds[0] == raggraph._STATEMENT_ORDER[0][0]
-    assert unwinds[1] == raggraph._STATEMENT_ORDER[1][0]  # narrator rows exist
+    assert unwinds[1] == raggraph._STATEMENT_ORDER[1][0]  # book rows exist
 
     # resume: everything already done
     driver2 = _FakeDriver()

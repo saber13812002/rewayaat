@@ -67,49 +67,91 @@ CONSTRAINTS: tuple[str, ...] = (
     "REQUIRE e.entity_key IS UNIQUE",
 )
 
-#: UNWIND-MERGE statements, one per row kind. ``$rows`` is a list of dicts.
+#: Node-creation statements. Each MERGEs a node by its unique key, so the rows
+#: must be deduped by that key before execution (see _exec_batch): a UNWIND of
+#: N rows all referencing the same shared node would otherwise try to CREATE it
+#: N times on a fresh graph and trip the uniqueness constraint.
+ST_BOOK = """
+UNWIND $rows AS r
+MERGE (b:Book {book_key: r.book_key})
+SET b += r.node
+"""
+ST_CHAPTER = """
+UNWIND $rows AS r
+MERGE (c:Chapter {chapter_key: r.chapter_key})
+SET c += r.node
+"""
 ST_NARRATION = """
 UNWIND $rows AS r
 MERGE (n:Narration {source_id: r.sid})
 SET n += r.node
-MERGE (n)-[:IN_BOOK]->(b:Book {book_key: r.book_key})
-SET b += r.book
-MERGE (n)-[:IN_CHAPTER]->(c:Chapter {chapter_key: r.chapter_key})
-SET c += r.chapter
-MERGE (b)-[:HAS_CHAPTER]->(c)
 """
 ST_NARRATOR = """
 UNWIND $rows AS r
-MATCH (x:Narration {source_id: r.sid})
 MERGE (p:Narrator {narrator_id: r.narrator_id})
 SET p += r.node
-MERGE (x)-[:NARRATED_BY {position: r.position}]->(p)
 """
 ST_ENTITY = """
 UNWIND $rows AS r
-MATCH (x:Narration {source_id: r.sid})
 MERGE (e:Entity {entity_key: r.entity_key})
 SET e += r.node
-MERGE (x)-[:MENTIONS_ENTITY]->(e)
 """
 ST_TOPIC = """
 UNWIND $rows AS r
-MATCH (x:Narration {source_id: r.sid})
 MERGE (t:Topic {value: r.value})
-MERGE (x)-[:HAS_TOPIC]->(t)
 """
 ST_VERSE = """
 UNWIND $rows AS r
-MATCH (x:Narration {source_id: r.sid})
 MERGE (v:QuranVerse {verse_key: r.verse_key})
 SET v.surah = r.surah, v.ayah = r.ayah
-MERGE (x)-[rr:REFERENCES {ref_type: r.ref_type, span: r.span}]->(v)
 """
-ST_CANDIDATE = """
+
+#: Relationship statements. Both endpoints are MATCHed (created in the node
+#: phase of the same batch, or an earlier batch), then the rel is MERGEd, so
+#: these are idempotent and safe to re-run.
+ST_REL_IN = """
 UNWIND $rows AS r
-MATCH (x:Narration {source_id: r.sid})
-MERGE (t:Topic {value: r.value})
-MERGE (x)-[:CANDIDATE_TOPIC]->(t)
+MATCH (n:Narration {source_id: r.sid})
+MATCH (b:Book {book_key: r.book_key})
+MATCH (c:Chapter {chapter_key: r.chapter_key})
+MERGE (n)-[:IN_BOOK]->(b)
+MERGE (n)-[:IN_CHAPTER]->(c)
+"""
+ST_REL_HAS_CHAPTER = """
+UNWIND $rows AS r
+MATCH (b:Book {book_key: r.book_key})
+MATCH (c:Chapter {chapter_key: r.chapter_key})
+MERGE (b)-[:HAS_CHAPTER]->(c)
+"""
+ST_REL_NARRATOR = """
+UNWIND $rows AS r
+MATCH (n:Narration {source_id: r.sid})
+MATCH (p:Narrator {narrator_id: r.narrator_id})
+MERGE (n)-[x:NARRATED_BY {position: r.position}]->(p)
+"""
+ST_REL_ENTITY = """
+UNWIND $rows AS r
+MATCH (n:Narration {source_id: r.sid})
+MATCH (e:Entity {entity_key: r.entity_key})
+MERGE (n)-[:MENTIONS_ENTITY]->(e)
+"""
+ST_REL_TOPIC = """
+UNWIND $rows AS r
+MATCH (n:Narration {source_id: r.sid})
+MATCH (t:Topic {value: r.value})
+MERGE (n)-[:HAS_TOPIC]->(t)
+"""
+ST_REL_VERSE = """
+UNWIND $rows AS r
+MATCH (n:Narration {source_id: r.sid})
+MATCH (v:QuranVerse {verse_key: r.verse_key})
+MERGE (n)-[x:REFERENCES {ref_type: r.ref_type, span: r.span}]->(v)
+"""
+ST_REL_CANDIDATE = """
+UNWIND $rows AS r
+MATCH (n:Narration {source_id: r.sid})
+MATCH (t:Topic {value: r.value})
+MERGE (n)-[:CANDIDATE_TOPIC]->(t)
 """
 
 #: deterministic RELATED_TO second pass (NO LLM): top-N other narrations
@@ -127,15 +169,35 @@ MERGE (a2)-[r:RELATED_TO]->(b)
 SET r.via = 'topics', r.score = shared
 """
 
-#: (statement, row kind) in execution order — narration rows must land first
-#: so the relationship statements can MATCH the source node.
+#: Node-creation statements in execution order. Narration comes first so the
+#: relationship phase can MATCH it. (statement, row kind, dedup key field).
+_NODE_ORDER: tuple[tuple[str, str, str], ...] = (
+    (ST_NARRATION, "narration", "sid"),
+    (ST_BOOK, "book", "book_key"),
+    (ST_CHAPTER, "chapter", "chapter_key"),
+    (ST_NARRATOR, "narrator", "narrator_id"),
+    (ST_ENTITY, "entity", "entity_key"),
+    (ST_TOPIC, "topic", "value"),
+    (ST_VERSE, "verse", "verse_key"),
+)
+
+#: Relationship statements in execution order. (statement, row kind, dedup key)
+#: — the key is the tuple of fields that identifies one relationship.
+_REL_ORDER: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    (ST_REL_IN, "in_book", ("sid", "book_key")),
+    (ST_REL_HAS_CHAPTER, "has_chapter", ("book_key", "chapter_key")),
+    (ST_REL_NARRATOR, "narrated_by", ("sid", "narrator_id", "position")),
+    (ST_REL_ENTITY, "mentions_entity", ("sid", "entity_key")),
+    (ST_REL_TOPIC, "has_topic", ("sid", "value")),
+    (ST_REL_VERSE, "references", ("sid", "verse_key", "ref_type", "span")),
+    (ST_REL_CANDIDATE, "candidate_topic", ("sid", "value")),
+)
+
+#: Legacy flat ordering (statement, row kind) kept for introspection/tests:
+#: node phase first, then the relationship phase.
 _STATEMENT_ORDER: tuple[tuple[str, str], ...] = (
-    (ST_NARRATION, "narration"),
-    (ST_NARRATOR, "narrator"),
-    (ST_ENTITY, "entity"),
-    (ST_TOPIC, "topic"),
-    (ST_VERSE, "verse"),
-    (ST_CANDIDATE, "candidate"),
+    [(st, kind) for st, kind, _ in _NODE_ORDER]
+    + [(st, kind) for st, kind, _ in _REL_ORDER]
 )
 
 GRAPH_LABELS: tuple[str, ...] = (
@@ -411,9 +473,17 @@ def clear_graph(driver) -> None:
 def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
     """Build all node/rel rows for one raw snapshot line.
 
-    Returns a dict keyed by row kind: narration(1), narrator, entity,
-    topic, verse, candidate. Row dicts carry both the node properties
-    (``r.node``) and the join keys the MERGE statements need.
+    Returns a dict with two families of row kinds:
+
+    * node kinds (``_NODE_ORDER``): narration(1), book, chapter, narrator,
+      entity, topic, verse. Each row carries the unique key field(s) plus a
+      ``node`` dict of properties.
+    * relationship kinds (``_REL_ORDER``): in_book, has_chapter, narrated_by,
+      mentions_entity, has_topic, references, candidate_topic. Each row
+      carries the endpoint key field(s) only.
+
+    Shared nodes (Book/Chapter/...) are deduped per batch by their unique key
+    in ``_exec_batch`` before the CREATE phase runs.
     """
     raw = line.get("raw") or {}
     sid = line.get("source_id") or raw.get("_id") or ""
@@ -441,8 +511,6 @@ def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
     rows: dict[str, list[dict]] = {
         "narration": [{
             "sid": sid,
-            "book_key": bkey,
-            "chapter_key": ckey,
             "node": {
                 "hadith_number": str(raw.get("number") or ""),
                 "book": book, "volume": vol, "part": part,
@@ -455,13 +523,21 @@ def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
                 "enriched": 1 if enr else 0,
                 "validation_status": validation_status,
             },
-            "book": {"book": book, "volume": vol,
-                     "source": str(raw.get("source") or "")},
-            "chapter": {"part": part, "part_ar": str(raw.get("part_ar") or ""),
-                        "chapter": chapter, "section": section},
         }],
-        "narrator": [], "entity": [], "topic": [], "verse": [],
-        "candidate": [],
+        "book": [{"book_key": bkey,
+                  "node": {"book": book, "volume": vol,
+                           "source": str(raw.get("source") or "")}}],
+        "chapter": [{"chapter_key": ckey,
+                     "node": {"part": part,
+                              "part_ar": str(raw.get("part_ar") or ""),
+                              "chapter": chapter, "section": section}}],
+        "in_book": [{"sid": sid, "book_key": bkey}],
+        "has_chapter": [{"book_key": bkey, "chapter_key": ckey}],
+        "narrator": [], "narrated_by": [],
+        "entity": [], "mentions_entity": [],
+        "topic": [], "has_topic": [],
+        "verse": [], "references": [],
+        "candidate_topic": [],
     }
 
     # narrators: chain order by s-offset (stable sort)
@@ -474,11 +550,13 @@ def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
     for pos, c in enumerate(chain, 1):
         p = c["p"]
         rows["narrator"].append({
-            "sid": sid, "narrator_id": p, "position": pos,
+            "narrator_id": p, "position": pos,
             "node": {"name_ar": str(c.get("t") or ""),
                      "name_en": str((en_by_p.get(p) or {}).get("t") or ""),
                      "slug": str(c.get("g") or "")},
         })
+        rows["narrated_by"].append(
+            {"sid": sid, "narrator_id": p, "position": pos})
 
     if not enr:
         return rows
@@ -488,18 +566,21 @@ def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
         if not v:
             continue
         etype = str(e.get("type") or "concept").strip()
+        ek = entity_key(etype, v)
         rows["entity"].append({
-            "sid": sid, "entity_key": entity_key(etype, v),
+            "entity_key": ek,
             "node": {"type": etype, "value": v,
                      "note": str(e.get("note") or "").strip()},
         })
+        rows["mentions_entity"].append({"sid": sid, "entity_key": ek})
 
     seen_topics: set[str] = set()
     for t in enr.get("topics") or []:
         n = normalize_topic(t)
         if n and n not in seen_topics:
             seen_topics.add(n)
-            rows["topic"].append({"sid": sid, "value": n})
+            rows["topic"].append({"value": n})
+            rows["has_topic"].append({"sid": sid, "value": n})
 
     for q in enr.get("quran_references") or []:
         s, a = q.get("surah"), q.get("ayah")
@@ -508,7 +589,9 @@ def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
         if s < 1 or s > 114 or a < 1:
             continue
         rows["verse"].append({
-            "sid": sid, "verse_key": verse_key(s, a), "surah": s, "ayah": a,
+            "verse_key": verse_key(s, a), "surah": s, "ayah": a})
+        rows["references"].append({
+            "sid": sid, "verse_key": verse_key(s, a),
             "ref_type": str(q.get("ref_type") or "mention"),
             "span": str(q.get("span") or "").strip(),
         })
@@ -518,15 +601,46 @@ def iter_graph_rows(line: dict, enr: dict | None, snap_id: str) -> dict:
         n = normalize_topic(hc.get("topic"))
         if n and n not in seen_cand:
             seen_cand.add(n)
-            rows["candidate"].append({"sid": sid, "value": n})
+            rows["candidate_topic"].append({"sid": sid, "value": n})
+            # candidate topics also exist as Topic nodes (MERGE idempotent)
+            if n not in seen_topics:
+                seen_topics.add(n)
+                rows["topic"].append({"value": n})
 
     return rows
 
 
+def _dedupe_rows(part: list[dict], key: str | tuple[str, ...]) -> list[dict]:
+    """Drop rows whose dedup key already appeared (order-preserving)."""
+    if isinstance(key, str):
+        key = (key,)
+    seen: set[tuple] = set()
+    out = []
+    for r in part:
+        k = tuple(r.get(f) for f in key)
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(r)
+    return out
+
+
 def _exec_batch(driver, rows: dict[str, list[dict]]) -> None:
+    """Two-phase batch.
+
+    Phase 1 creates nodes, deduped by unique key: on a fresh graph a
+    UNWIND-MERGE of N rows all targeting the same shared node would CREATE it
+    N times and trip the uniqueness constraint, so duplicates are dropped
+    first. Phase 2 wires relationships by MATCHing both endpoints (created in
+    this or an earlier batch) and MERGing the rel — idempotent.
+    """
     with driver.session() as s:
-        for st, kind in _STATEMENT_ORDER:
-            part = rows.get(kind) or []
+        for st, kind, key in _NODE_ORDER:
+            part = _dedupe_rows(rows.get(kind) or [], key)
+            if part:
+                s.run(st, rows=part)
+        for st, kind, key in _REL_ORDER:
+            part = _dedupe_rows(rows.get(kind) or [], key)
             if part:
                 s.run(st, rows=part)
 
