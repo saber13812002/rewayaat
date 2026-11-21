@@ -41,8 +41,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import (analytics, config, detect, exporter, http, normalize, publish,
-               snapshot, store)
+from . import (analytics, config, detect, enrich, exporter, http, normalize,
+               publish, snapshot, store)
 
 LOCK_NAME = "sync.lock"
 _LOCK_MAX_AGE_S = 24 * 3600
@@ -367,6 +367,61 @@ def _cmd_export(args) -> int:
                   f"{cc['incomplete']}")
         else:
             print("  completeness vs live catalog: OK")
+    if args.enrich:
+        enr_path = Path(args.enrich)
+        if not enr_path.is_file():
+            print(f"ERROR: --enrich file not found: {enr_path}")
+            return 1
+        em = manifest.get("enrichment") or {}
+        print(f"  enrichment merged from {enr_path.name}: "
+              f"{em.get('enriched_docs')} docs")
+    return 0
+
+
+def _cmd_enrich(args) -> int:
+    conn = store.open_db()
+    if args.raw:
+        raw_path = Path(args.raw)
+        if not raw_path.is_file():
+            print(f"ERROR: --raw file not found: {raw_path}")
+            return 1
+        snap_id = args.snap or raw_path.stem
+    else:
+        snap_id = args.snap or store.latest_snapshot(
+            conn, complete_only=not args.allow_partial)
+        if snap_id is None:
+            scope = "complete" if not args.allow_partial else ""
+            print(f"ERROR: no {scope}snapshot in the store; run `snapshot` "
+                  "first (or pass --raw).")
+            return 1
+        row = conn.execute("SELECT raw_path FROM snapshots WHERE id=?",
+                           (snap_id,)).fetchone()
+        if row is None:
+            print(f"ERROR: snapshot {snap_id} not in the store "
+                  "(scoped runs are not stored); pass --raw <path>.")
+            return 1
+        raw_path = store.resolve_raw_path(row[0])
+    if not raw_path.is_file():
+        print(f"ERROR: raw snapshot file not found: {raw_path}")
+        return 1
+
+    client = enrich.LlmClient()
+    books = [b.strip() for b in args.books.split(",") if b.strip()] \
+        if args.books else None
+    summary = enrich.run_enrichment(
+        raw_path, snap_id, client=client, resume=not args.no_resume,
+        limit=args.limit, books=books)
+    print(f"enrich {snap_id}: {summary['enriched']}/{summary['total_docs']} "
+          f"enriched, {summary['failed']} failed "
+          f"({summary['processed_this_run']} this run) -> {summary['out_dir']}")
+    if summary["failed"]:
+        print(f"  WARNING: status={summary['status']}; failed ids: "
+              f"{summary['failed_ids'][:10]}"
+              + (" ..." if summary["failed"] > 10 else ""))
+    if args.embed:
+        esum = enrich.run_embeddings(raw_path, snap_id, client=client)
+        print(f"  embeddings: {esum['vectors']} vectors "
+              f"(model={esum['model']}) -> {esum['out_dir']}")
     return 0
 
 
@@ -446,7 +501,35 @@ def build_parser() -> argparse.ArgumentParser:
     xp.add_argument("--dest", metavar="DIR",
                     help="output directory (default: "
                          "DATA_DIR/out/export/<snap_id>)")
+    xp.add_argument("--enrich", metavar="PATH",
+                    help="Phase-3 enrichment.jsonl to merge into the export "
+                         "(fills `persian` + attaches `enrichment`)")
     xp.set_defaults(func=_cmd_export)
+
+    ep = sub.add_parser("enrich",
+                        help="Phase-3 LLM enrichment: trilingual + entities "
+                             "/ topics / Quran & hadith references "
+                             "(checkpointed, resumable)")
+    ep.add_argument("--raw", metavar="PATH",
+                    help="raw snapshot JSONL to enrich (default: latest "
+                         "complete snapshot in the store)")
+    ep.add_argument("--snap", metavar="ID",
+                    help="snapshot id (default: inferred from the --raw "
+                         "filename, or the latest complete snapshot)")
+    ep.add_argument("--allow-partial", action="store_true",
+                    help="allow enriching the latest snapshot even if its "
+                         "status is 'partial'")
+    ep.add_argument("--books", metavar="A,B,C",
+                    help="only enrich these books (exact /v1/browse/books "
+                         "names, comma-separated)")
+    ep.add_argument("--limit", type=int, default=None, metavar="N",
+                    help="enrich at most N pending docs this run")
+    ep.add_argument("--no-resume", action="store_true",
+                    help="start fresh (truncate enrichment.jsonl + state)")
+    ep.add_argument("--embed", action="store_true",
+                    help="after enriching, also generate embeddings "
+                         "(arabic || english || persian) for enriched docs")
+    ep.set_defaults(func=_cmd_enrich)
     return p
 
 
@@ -456,8 +539,8 @@ def main(argv: list[str] | None = None) -> int:
         return args.func(args)
     except (snapshot.IncompleteSnapshotError,
             detect.IncompleteSnapshotError,
-            publish.PublishError, exporter.ExportError, http.HttpError,
-            OSError, ValueError) as exc:
+            publish.PublishError, exporter.ExportError, enrich.LlmError,
+            http.HttpError, OSError, ValueError) as exc:
         print(f"ERROR: {exc}")
         return 1
 

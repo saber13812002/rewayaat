@@ -62,7 +62,7 @@ _NESTED_COLS = (
     "topic_tags", "tags", "gradings", "related", "history",
     "chain", "chain_links", "chain_links_en",
     "semantic_matn", "semantic_terms",
-    "provenance", "metadata", "raw",
+    "provenance", "metadata", "raw", "enrichment",
 )
 _ALL_COLS = _FLAT_STRING_COLS + _NESTED_COLS
 
@@ -162,6 +162,9 @@ def build_export_doc(line: dict, snap_id: str) -> dict:
         "provenance": prov,
         "metadata": metadata,
         "raw": raw,
+        # Phase-3 placeholder: filled by the LLM enrichment pass (same
+        # source_id) when the export is built with an enrichment.jsonl.
+        "enrichment": None,
     }
     return {k: doc[k] for k in _ALL_COLS}
 
@@ -241,6 +244,17 @@ One record per narration. The stable, corpus-wide unique key is
 | `normalization_version` | string | Normalizer version. |
 | `metadata` | obj | **All upstream fields verbatim** (nothing dropped except `_id`/`arabic`/`english` which are promoted). |
 | `raw` | obj | The **entire** raw API document, byte-for-byte (provenance). |
+
+## Phase-3 LLM enrichment (separate pass, merged at export time)
+| Field | Type | Description |
+|-------|------|-------------|
+| `enrichment` | obj/null | Full LLM enrichment record under the same `source_id`. `null` until the Phase-3 pass has run and been merged into the export. LLM output is reviewable, never authoritative. |
+| `enrichment.persian` | string/null | Persian translation (also mirrored to the top-level `persian` column). |
+| `enrichment.entities` | list[obj] | `{{type, value, note}}` — people/places/concepts/objects in the text. |
+| `enrichment.topics` | list[str] | 3–8 lowercase English topical tags. |
+| `enrichment.quran_references` | list[obj] | `{{surah (1-114), ayah (>=1), ref_type (quote/mention/allusion), span}}`. |
+| `enrichment.hadith_candidates` | list[obj] | `{{topic, reason}}` — search suggestions for related narrations (no invented hadith numbers/ids). |
+| `enrichment.provenance` | obj | `model`, `prompt_version`, `prompt_hash`, `latency_ms`, `completion_tokens`, `finish_reason`, `validation {{status, issues}}`, `generated_at`. |
 
 ## Re-import into Elasticsearch
 See `mappings.json` (index mapping) and `README.md` (bulk import recipe).
@@ -417,6 +431,41 @@ def _es_mapping() -> dict:
                 },
                 "metadata": {"type": "object", "enabled": False},
                 "raw": {"type": "object", "enabled": False},
+                "enrichment": {
+                    "properties": {
+                        "persian": {"type": "text"},
+                        "topics": {"type": "keyword"},
+                        "quran_references": {
+                            "properties": {
+                                "surah": {"type": "integer"},
+                                "ayah": {"type": "integer"},
+                                "ref_type": {"type": "keyword"},
+                                "span": {"type": "text",
+                                         "analyzer": "arabic_norm"},
+                            },
+                        },
+                        "entities": {"type": "object", "enabled": False},
+                        "hadith_candidates": {"type": "object",
+                                              "enabled": False},
+                        "provenance": {
+                            "properties": {
+                                "model": {"type": "keyword"},
+                                "prompt_version": {"type": "keyword"},
+                                "prompt_hash": {"type": "keyword"},
+                                "latency_ms": {"type": "integer"},
+                                "completion_tokens": {"type": "integer"},
+                                "finish_reason": {"type": "keyword"},
+                                "validation": {
+                                    "properties": {
+                                        "status": {"type": "keyword"},
+                                        "issues": {"type": "keyword"},
+                                    },
+                                },
+                                "generated_at": {"type": "date"},
+                            },
+                        },
+                    },
+                },
             }
         },
     }
@@ -503,7 +552,10 @@ doc (same `_id`), so a re-run produces no duplicates.
 `arabic` is the authoritative source text. `english` is the published
 translation. `persian` is produced by a later LLM enrichment pass (Phase 3)
 under the same `source_id` and is *never* authoritative — it is reviewable and
-traceable via its own provenance fields.
+traceable via its own provenance fields. When the export is built with
+`--enrich <enrichment.jsonl>`, the full LLM record is attached under
+`enrichment` (top-level `persian` filled) and the manifest records which
+enrichment file was used and how many docs were enriched.
 """
     return (tpl.replace("__SNAP__", snap_id)
                 .replace("__STATUS__", status)
@@ -516,12 +568,17 @@ traceable via its own provenance fields.
 
 def build_export(dest: Path, *, raw_path: Path, snap_id: str,
                  status: str = "unknown",
-                 verify_live_books: list | None = None) -> dict:
+                 verify_live_books: list | None = None,
+                 enrichment_path: Path | None = None) -> dict:
     """Build the full export under ``dest``; returns the manifest dict.
 
     ``raw_path`` is the finalized snapshot JSONL. ``verify_live_books`` (a list
     of ``fetch.Book``-like objects with ``.name``/``.count``) is optional; when
     given, completeness is checked and recorded in the manifest.
+    ``enrichment_path`` (a Phase-3 ``enrichment.jsonl``) is optional; when
+    given, the enrichment records are merged into the export docs under the
+    same ``source_id`` (fills ``persian`` + attaches ``enrichment``) and the
+    manifest records which file was used and how many docs were enriched.
     """
     dest = Path(dest)
     if dest.exists():
@@ -531,6 +588,14 @@ def build_export(dest: Path, *, raw_path: Path, snap_id: str,
 
     lines = _read_lines(raw_path)
     docs = [build_export_doc(l, snap_id) for l in _dedupe(lines)]
+
+    enr_by_id: dict[str, dict] = {}
+    if enrichment_path is not None:
+        from . import enrich
+        enr_by_id = enrich.load_enrichment(Path(enrichment_path))
+        for d in docs:
+            enrich.apply_enrichment(d, enr_by_id.get(d["source_id"]))
+
     book_counts = _book_counts(docs)
 
     # --- records.jsonl --------------------------------------------------------
@@ -579,6 +644,10 @@ def build_export(dest: Path, *, raw_path: Path, snap_id: str,
         "snapshot_status": status,
         "docs_total": len(docs),
         "books": book_counts,
+        "enrichment": None if enrichment_path is None else {
+            "source": str(enrichment_path),
+            "enriched_docs": sum(1 for d in docs if d.get("enrichment")),
+        },
         "files": files,
         "manifest_sha256": "",
         "source_raw": str(raw_path),

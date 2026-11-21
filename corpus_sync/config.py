@@ -4,6 +4,7 @@ All tunables live here so that tuning (rate limits, timeouts, paths) never
 requires touching call sites. See docs/corpus-sync/recovery-guide.md.
 """
 
+import os
 from pathlib import Path
 
 # --- API -------------------------------------------------------------------
@@ -36,3 +37,23 @@ NORM_VERSION: str = "1.0"           # rules v1.0: NFKC + strip for field hashes
 HF_REPO_ID: str = "saber13812002/rewayaat-corpus"
 HF_IS_PRIVATE: bool = True          # stays private until a data license is confirmed
 HF_LICENSE: str = "UNCONFIRMED - private"
+
+# --- LLM gateway (Phase 3 enrichment) -----------------------------------------
+# OpenAI-compatible litellm gateway (verified on s52, 2026-11-21). The key is
+# NOT committed: it comes from the rag-gateway container env on the server
+# (GATEWAY_LLM_API_KEY == LITELLM_MASTER_KEY, len 67, prefix sk-).
+LLM_BASE_URL: str = os.environ.get("LLM_BASE_URL", "http://127.0.0.1:4101")
+LLM_API_KEY: str = os.environ.get("LLM_API_KEY", "")
+LLM_CHAT_MODEL: str = os.environ.get("LLM_CHAT_MODEL", "gpt-oss-120b")
+# gpt-oss-120b is a vLLM reasoning model: it spends completion budget on
+# reasoning_content first. max_tokens=40 returned content=null with
+# finish_reason=length; max_tokens=600 returned content at 136 tokens / 0.7 s.
+# Always request a generous completion budget and check finish_reason.
+LLM_MAX_TOKENS: int = int(os.environ.get("LLM_MAX_TOKENS", "2048"))
+LLM_TEMPERATURE: float = float(os.environ.get("LLM_TEMPERATURE", "0"))
+LLM_REQUEST_TIMEOUT_S: int = int(os.environ.get("LLM_REQUEST_TIMEOUT_S", "120"))
+LLM_MAX_RETRIES: int = 3            # attempts per call (1 + 2 retries)
+LLM_MIN_BACKOFF_S: float = 2.0
+# Embedding models (verified dims): q1-embedding-4b=2560, q1-embedding-06b=1024.
+LLM_EMBED_MODEL: str = os.environ.get("LLM_EMBED_MODEL", "q1-embedding-06b")
+ENRICH_PROMPT_VERSION: str = "1.0"  # bump when the prompt text changes
