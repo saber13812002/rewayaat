@@ -108,3 +108,8 @@ v45-production-release-plan.md
 # they live. Committing them would put 6MB of derivable binary in every clone.
 scripts/connector-guides/*.mp4
 scripts/connector-guides/*.jpg
+
+# Python virtual environments (server-local .venv is NOT tracked; a stray
+# `git stash push -u` on s52 once swept 6.5k venv files into the stash).
+.venv/
+*.egg-info/
