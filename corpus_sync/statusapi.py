@@ -132,12 +132,41 @@ def _pct(part: int, total: int) -> Optional[float]:
     return round(part * 100.0 / total, 2)
 
 
+def _iso_age_s(ts: str | None) -> Optional[float]:
+    """Seconds since an ISO-8601 UTC 'YYYY-MM-DDTHH:MM:SSZ' stamp (None on parse fail)."""
+    if not ts:
+        return None
+    try:
+        dt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - dt).total_seconds()
+    except ValueError:
+        return None
+
+
+def _count_jsonl_lines(path: Path) -> Optional[int]:
+    """Count physical lines of a jsonl file (fast, binary read)."""
+    n = 0
+    try:
+        with open(path, "rb") as fh:
+            for _ in fh:
+                n += 1
+    except OSError:
+        return None
+    return n
+
+
 # ---------------------------------------------------------------------------
 # collectors (each returns a stage dict; never raises)
 # ---------------------------------------------------------------------------
 
 def collect_snapshot(env: dict) -> dict:
-    """Extraction stage: latest snapshot row + live snapshot state file."""
+    """Extraction stage: latest snapshot row + live snapshot state + raw count.
+
+    The snapshots table row is only written when a run COMPLETES, so while a
+    run is in flight we read data/state/snapshot_state.json (touched on every
+    progress line) and count the raw jsonl — real numbers only.
+    """
     out: dict[str, Any] = {"status": "unknown"}
     db = env["data_dir"] / "db" / "corpus_sync.db"
     if not db.is_file():
@@ -160,18 +189,43 @@ def collect_snapshot(env: dict) -> dict:
                 "books": books,
             })
         else:
-            out["error"] = "no snapshots recorded"
+            out["error"] = "no snapshots recorded yet"
     except sqlite3.Error as e:
         out["error"] = str(e)[:200]
     finally:
         conn.close()
     st = env["data_dir"] / "state" / "snapshot_state.json"
+    js: dict = {}
     if st.is_file():
         try:
             js = json.loads(st.read_text(encoding="utf-8"))
-            out["last_activity"] = js.get("last_activity")
         except (OSError, ValueError):
             pass
+    if js:
+        out["last_activity"] = js.get("last_activity")
+        dest = js.get("snapshot")
+        age = _iso_age_s(js.get("last_activity"))
+        if dest:
+            raw = env["data_dir"] / "raw" / dest
+            if age is not None and age < 600:
+                # live run: prefer the in-flight numbers over any old row
+                if out.get("snap_id"):
+                    out["last_snap_id"] = out.pop("snap_id")
+                    for k in ("created_at", "book_count", "books"):
+                        out.pop(k, None)
+                out.update({
+                    "status": "running",
+                    "snap_id": dest,
+                    "total_docs": _count_jsonl_lines(raw),
+                    "raw_path": str(raw) if raw.is_file() else None,
+                })
+            elif not out.get("snap_id"):
+                out.update({
+                    "status": "idle",
+                    "snap_id": dest,
+                    "total_docs": _count_jsonl_lines(raw),
+                    "raw_path": str(raw) if raw.is_file() else None,
+                })
     if out.get("status") == "unknown":
         out.setdefault("status", "unknown")
     return out
