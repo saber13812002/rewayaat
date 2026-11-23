@@ -1,0 +1,9 @@
+[Unit]
+Description=Rewayaat pipeline state backup (hourly)
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/rewayaat
+ExecStart=%h/rewayaat/deploy/backup_status.sh
+Nice=10
+IOSchedulingClass=best-effort

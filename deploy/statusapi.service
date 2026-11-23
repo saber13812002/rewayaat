@@ -1,0 +1,18 @@
+[Unit]
+Description=Rewayaat Corpus Status API v1 (port 8190)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/rewayaat
+EnvironmentFile=%h/rewayaat/deploy/statusapi.env
+ExecStart=%h/rewayaat/.venv/bin/python -m corpus_sync.statusapi
+Restart=on-failure
+RestartSec=15
+# the poller + collectors open many short-lived connections; keep them out
+# of the default limits
+LimitNOFILE=8192
+
+[Install]
+WantedBy=default.target

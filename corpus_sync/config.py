@@ -4,6 +4,7 @@ All tunables live here so that tuning (rate limits, timeouts, paths) never
 requires touching call sites. See docs/corpus-sync/recovery-guide.md.
 """
 
+import json
 import os
 from pathlib import Path
 
@@ -59,6 +60,21 @@ LLM_TEMPERATURE: float = float(os.environ.get("LLM_TEMPERATURE", "0"))
 LLM_REQUEST_TIMEOUT_S: int = int(os.environ.get("LLM_REQUEST_TIMEOUT_S", "300"))
 LLM_MAX_RETRIES: int = 3            # attempts per call (1 + 2 retries)
 LLM_MIN_BACKOFF_S: float = 2.0
+# Extra body kwargs merged into every /v1/chat/completions payload (JSON).
+# For reasoning-capable models (Qwen3.8 "thinking" mode) this is how we turn
+# the chain-of-thought off: {"chat_template_kwargs": {"enable_thinking": false}}
+# saves ~30-90 s/doc on the H100 box (measured 2026-11-22: 0.8s vs 35-90s).
+LLM_EXTRA_BODY_JSON: str = os.environ.get("LLM_EXTRA_BODY_JSON", "")
+
+
+def _extra_body() -> dict:
+    if not LLM_EXTRA_BODY_JSON:
+        return {}
+    try:
+        v = json.loads(LLM_EXTRA_BODY_JSON)
+        return v if isinstance(v, dict) else {}
+    except (ValueError, TypeError):
+        return {}
 # Embedding models (verified dims): q1-embedding-4b=2560, q1-embedding-06b=1024.
 LLM_EMBED_MODEL: str = os.environ.get("LLM_EMBED_MODEL", "q1-embedding-06b")
 ENRICH_PROMPT_VERSION: str = "1.0"  # bump when the prompt text changes

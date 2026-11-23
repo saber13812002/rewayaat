@@ -1,63 +1,14 @@
 {
- "updated_at": "2026-11-21T00:06:49Z",
- "derived_state": "RUNNING",
- "warnings": [],
- "snapshot_state": {
-  "snapshot": "snapshot-20261117-204731-1.jsonl",
-  "completed": 3306,
-  "totals": 3327,
-  "failed": [
-   "book:Al-Amālī",
-   "book:Al-Khiṣāl",
-   "book:Al-Kāfi chapter:Another Chapter",
-   "book:Al-Kāfi chapter:Enlightening Points Deduced from the Holy Quran about Leadership with Divine Authority)",
-   "book:Al-Kāfi chapter:Hadith",
-   "book:Al-Kāfi chapter:Inheritance",
-   "book:Al-Kāfi chapter:Rare Ahadith",
-   "book:Al-Kāfi chapter:Rare Ahadith ",
-   "book:Al-Kāfi chapter:The Rare Ahadith",
-   "book:Al-Tawḥīd",
-   "book:Kitāb al-Ghayba",
-   "book:Kitāb al-Muʾmin",
-   "book:Kitāb al-Zuhd",
-   "book:Kāmil al-Ziyārāt",
-   "book:Man Lā Yaḥḍuruh al-Faqīh",
-   "book:Maʿānī al-ʾAkhbār",
-   "book:Mishkāt al-Anwār",
-   "book:Muʿjam al-Aḥādīth al-Muʿtabara"
-  ],
-  "last_activity": "2026-11-21T00:08:01Z",
-  "sha256": ""
- },
- "failed_labels": [
-  "book:Al-Amālī",
-  "book:Al-Khiṣāl",
-  "book:Al-Kāfi chapter:Another Chapter",
-  "book:Al-Kāfi chapter:Enlightening Points Deduced from the Holy Quran about Leadership with Divine Authority)",
-  "book:Al-Kāfi chapter:Hadith",
-  "book:Al-Kāfi chapter:Inheritance",
-  "book:Al-Kāfi chapter:Rare Ahadith",
-  "book:Al-Kāfi chapter:Rare Ahadith ",
-  "book:Al-Kāfi chapter:The Rare Ahadith",
-  "book:Al-Tawḥīd",
-  "book:Kitāb al-Ghayba",
-  "book:Kitāb al-Muʾmin",
-  "book:Kitāb al-Zuhd",
-  "book:Kāmil al-Ziyārāt",
-  "book:Man Lā Yaḥḍuruh al-Faqīh",
-  "book:Maʿānī al-ʾAkhbār",
-  "book:Mishkāt al-Anwār",
-  "book:Muʿjam al-Aḥādīth al-Muʿtabara"
+ "updated_at": "2026-11-21T13:22:22Z",
+ "derived_state": "PROBE_ERROR",
+ "warnings": [
+  "probe failed: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
  ],
- "raw": {
-  "file": "snapshot-20261117-204731-1.jsonl",
-  "lines": 29163,
-  "size_mb": 154.3
- },
+ "snapshot_state": null,
+ "failed_labels": [],
+ "raw": null,
  "db_latest": null,
- "proc": [
-  "777101 /home/saber/rewayaat/.venv/bin/python -m corpus_sync.cli snapshot"
- ],
- "rate_docs_h": 29132.3,
- "eta_h": 0.73
+ "proc": null,
+ "rate_docs_h": 0.0,
+ "eta_h": null
 }

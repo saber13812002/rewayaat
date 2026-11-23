@@ -1,0 +1,9 @@
+hour=2026-11-21T11  state=PROBE_ERROR
+snapshot: None  completed=None totals=None  failed=0
+last_activity: None
+raw: None  lines=None  size_mb=None
+db: none yet (populated at finalize)
+proc: none
+rate: 0 docs/h  eta: n/a
+warnings: ["probe failed: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"]
+failed labels: []

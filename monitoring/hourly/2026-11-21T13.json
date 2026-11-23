@@ -1,0 +1,14 @@
+{
+ "hour": "2026-11-21T13",
+ "state": "PROBE_ERROR",
+ "raw": null,
+ "state_file": {},
+ "failed": [],
+ "db": null,
+ "proc": null,
+ "rate_docs_h": 0.0,
+ "eta_h": null,
+ "warnings": [
+  "probe failed: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+ ]
+}

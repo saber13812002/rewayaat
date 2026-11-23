@@ -1,0 +1,9 @@
+hour=2026-11-21T05  state=RUNNING
+snapshot: snapshot-20261117-204731-1.jsonl  completed=3308 totals=3329  failed=21
+last_activity: 2026-11-21T05:10:32Z
+raw: snapshot-20261117-204731-1.jsonl  lines=32405  size_mb=162.4
+db: none yet (populated at finalize)
+proc: ['777101 /home/saber/rewayaat/.venv/bin/python -m corpus_sync.cli snapshot', "1612432 bash -c cd ~/rewayaat && LLM_API_KEY=sk-d58f7724e2e3167efde8b6c5e09a7a9b1c38b98938aeb2b68781d7e643e9ef06 PYTHONIOENCODING=utf-8 nohup .venv/bin/python -m corpus_sync.cli enrich --raw data/raw/snapshot-20261117-204731-1.jsonl --snap snapshot-20261117-204731-1 >> data/enrich_bg.log 2>&1 & echo RESTARTED; sleep 3; ps aux | grep 'corpus_sync.cli enrich' | grep -v grep | awk '{print \\$2}'", '1612434 .venv/bin/python -m corpus_sync.cli enrich --raw data/raw/snapshot-20261117-204731-1.jsonl --snap snapshot-20261117-204731-1']
+rate: 5395 docs/h  eta: 3.4h
+warnings: none
+failed labels: ['book:Al-Amālī', 'book:Al-Khiṣāl', 'book:Al-Kāfi chapter:Another Chapter', 'book:Al-Kāfi chapter:Enlightening Points Deduced from the Holy Quran about Leadership with Divine Authority)', 'book:Al-Kāfi chapter:Hadith', 'book:Al-Kāfi chapter:Inheritance', 'book:Al-Kāfi chapter:Rare Ahadith', 'book:Al-Kāfi chapter:Rare Ahadith ', 'book:Al-Kāfi chapter:The Rare Ahadith', 'book:Al-Tawḥīd', 'book:Kitāb al-Ghayba', 'book:Kitāb al-Muʾmin', 'book:Kitāb al-Zuhd', 'book:Kāmil al-Ziyārāt', 'book:Man Lā Yaḥḍuruh al-Faqīh', 'book:Maʿānī al-ʾAkhbār', 'book:Mishkāt al-Anwār', 'book:Muʿjam al-Aḥādīth al-Muʿtabara', 'book:Nahj al-Balāgha', 'book:Thawāb al-Aʿmāl wa ʿiqāb al-Aʿmāl', 'book:ʿUyūn akhbār al-Riḍā']

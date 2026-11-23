@@ -210,6 +210,9 @@ class LlmClient:
         self.timeout = timeout if timeout is not None else config.LLM_REQUEST_TIMEOUT_S
         self.max_retries = max_retries if max_retries is not None else config.LLM_MAX_RETRIES
         self.backoff_s = backoff_s if backoff_s is not None else config.LLM_MIN_BACKOFF_S
+        # Extra payload kwargs (e.g. chat_template_kwargs to disable Qwen
+        # thinking mode). Captured at construction so process env wins.
+        self.extra_body = config._extra_body()
         self._session = session or requests.Session()
 
     def _headers(self) -> dict:
@@ -241,6 +244,8 @@ class LlmClient:
                 "max_tokens": budget,
                 "temperature": temp,
             }
+            if self.extra_body:
+                payload.update(self.extra_body)
             t0 = time.monotonic()
             try:
                 r = self._session.post(url, json=payload, headers=self._headers(),
@@ -398,6 +403,19 @@ def _load_state(path: Path, snap_id: str) -> dict | None:
 
 def _save_state(path: Path, state: dict) -> None:
     state["last_activity"] = _now()
+    # Merge state saved by other parallel workers (book-partitioned runs) so
+    # concurrent checkpointers never drop each other's completed ids.
+    try:
+        other = _load_state(path, state.get("snap_id"))
+    except Exception:  # noqa: BLE001 - best-effort merge
+        other = None
+    if other:
+        seen = set(state["completed"])
+        for sid in other["completed"]:
+            if sid not in seen:
+                state["completed"].append(sid)
+        for sid, info in other["failed"].items():
+            state["failed"].setdefault(sid, info)
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1),
                    encoding="utf-8")
